@@ -2,14 +2,26 @@
   @apply p-12 px-8 sm:px-12;
 }
 
-.ProseMirror .is-editor-empty:first-child::before {
+.ProseMirror p.is-editor-empty:first-child::before,
+.ProseMirror h1.is-editor-empty:first-child::before,
+.ProseMirror h2.is-editor-empty:first-child::before,
+.ProseMirror h3.is-editor-empty:first-child::before,
+.ProseMirror h4.is-editor-empty:first-child::before,
+.ProseMirror h5.is-editor-empty:first-child::before,
+.ProseMirror h6.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
   color: hsl(var(--muted-foreground));
   pointer-events: none;
   height: 0;
 }
-.ProseMirror .is-empty::before {
+.ProseMirror p.is-empty::before,
+.ProseMirror h1.is-empty::before,
+.ProseMirror h2.is-empty::before,
+.ProseMirror h3.is-empty::before,
+.ProseMirror h4.is-empty::before,
+.ProseMirror h5.is-empty::before,
+.ProseMirror h6.is-empty::before {
   content: attr(data-placeholder);
   float: left;
   color: hsl(var(--muted-foreground));
