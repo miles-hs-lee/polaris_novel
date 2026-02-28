@@ -1,7 +1,10 @@
 "use client";
 
-import { Check, Menu as MenuIcon, Monitor, Moon, SunDim } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Check, Download, FileJson, FileUp, Menu as MenuIcon, Monitor, Moon, SunDim } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useEditor } from "novel";
+import { toast } from "sonner";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
@@ -34,9 +37,84 @@ const appearances = [
     icon: <Moon className="h-4 w-4" />,
   },
 ];
+
+const buildFilename = (ext: "json" | "md") => {
+  const date = new Date();
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `novel-${yyyy}${mm}${dd}.${ext}`;
+};
+
+const downloadText = (filename: string, content: string, contentType: string) => {
+  const blob = new Blob([content], { type: contentType });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+};
+
 export default function Menu() {
   // const { font: currentFont, setFont } = useContext(AppContext);
+  const [mounted, setMounted] = useState(false);
   const { theme: currentTheme, setTheme } = useTheme();
+  const { editor } = useEditor();
+  const disabled = !editor;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleImportMarkdown = () => {
+    if (!editor) {
+      toast.error("에디터가 아직 준비되지 않았습니다.");
+      return;
+    }
+
+    const confirmed = window.confirm("현재 내용을 Markdown 파일 내용으로 바꿀까요?");
+    if (!confirmed) return;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".md,.markdown,.txt,text/markdown,text/plain";
+    input.onchange = async () => {
+      try {
+        const file = input.files?.[0];
+        if (!file) return;
+        const markdown = await file.text();
+        editor.commands.setContent(markdown, true);
+        editor.commands.focus("start");
+        toast.success("Markdown 파일을 불러왔습니다.");
+      } catch {
+        toast.error("Markdown 파일을 불러오지 못했습니다.");
+      }
+    };
+    input.click();
+  };
+
+  const handleExportMarkdown = () => {
+    if (!editor) {
+      toast.error("에디터가 아직 준비되지 않았습니다.");
+      return;
+    }
+
+    const markdown = editor.storage.markdown.getMarkdown();
+    downloadText(buildFilename("md"), markdown, "text/markdown;charset=utf-8");
+    toast.success("Markdown 파일을 내보냈습니다.");
+  };
+
+  const handleExportJson = () => {
+    if (!editor) {
+      toast.error("에디터가 아직 준비되지 않았습니다.");
+      return;
+    }
+
+    const json = editor.getJSON();
+    downloadText(buildFilename("json"), JSON.stringify(json, null, 2), "application/json;charset=utf-8");
+    toast.success("JSON 파일을 내보냈습니다.");
+  };
 
   return (
     <Popover>
@@ -66,6 +144,48 @@ export default function Menu() {
             </button>
           ))}
         </div> */}
+        <p className="p-2 text-xs font-medium text-muted-foreground">Import / Export</p>
+        <Button
+          variant="ghost"
+          className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
+          onClick={handleImportMarkdown}
+          disabled={disabled}
+        >
+          <div className="flex items-center space-x-2">
+            <div className="rounded-sm border p-1">
+              <FileUp className="h-4 w-4" />
+            </div>
+            <span>MD 가져오기</span>
+          </div>
+        </Button>
+        <Button
+          variant="ghost"
+          className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
+          onClick={handleExportMarkdown}
+          disabled={disabled}
+        >
+          <div className="flex items-center space-x-2">
+            <div className="rounded-sm border p-1">
+              <Download className="h-4 w-4" />
+            </div>
+            <span>MD 내보내기</span>
+          </div>
+        </Button>
+        <Button
+          variant="ghost"
+          className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
+          onClick={handleExportJson}
+          disabled={disabled}
+        >
+          <div className="flex items-center space-x-2">
+            <div className="rounded-sm border p-1">
+              <FileJson className="h-4 w-4" />
+            </div>
+            <span>JSON 내보내기</span>
+          </div>
+        </Button>
+
+        <div className="my-1 h-px bg-border" />
         <p className="p-2 text-xs font-medium text-muted-foreground">Appearance</p>
         {appearances.map(({ theme, icon }) => (
           <Button
@@ -80,7 +200,7 @@ export default function Menu() {
               <div className="rounded-sm border  p-1">{icon}</div>
               <span>{theme}</span>
             </div>
-            {currentTheme === theme.toLowerCase() && <Check className="h-4 w-4" />}
+            {mounted && currentTheme === theme.toLowerCase() && <Check className="h-4 w-4" />}
           </Button>
         ))}
       </PopoverContent>

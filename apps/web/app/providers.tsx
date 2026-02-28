@@ -1,6 +1,6 @@
 "use client";
 
-import { type Dispatch, type ReactNode, type SetStateAction, createContext } from "react";
+import { type Dispatch, type ReactNode, type SetStateAction, createContext, useEffect, useState } from "react";
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
@@ -15,9 +15,17 @@ export const AppContext = createContext<{
 });
 
 const ToasterProvider = () => {
+  const [mounted, setMounted] = useState(false);
   const { theme } = useTheme() as {
     theme: "light" | "dark" | "system";
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return <Toaster theme={theme} />;
 };
 

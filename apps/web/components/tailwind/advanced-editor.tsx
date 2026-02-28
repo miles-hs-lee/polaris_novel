@@ -22,6 +22,7 @@ import { LinkSelector } from "./selectors/link-selector";
 import { MathSelector } from "./selectors/math-selector";
 import { NodeSelector } from "./selectors/node-selector";
 import { Separator } from "./ui/separator";
+import Menu from "./ui/menu";
 
 import GenerativeMenuSwitch from "./generative/generative-menu-switch";
 import { uploadFn } from "./image-upload";
@@ -63,21 +64,23 @@ const TailwindAdvancedEditor = () => {
   }, 500);
 
   useEffect(() => {
-    const content = window.localStorage.getItem("novel-content");
-    if (content) setInitialContent(JSON.parse(content));
-    else setInitialContent(defaultEditorContent);
+    try {
+      const content = window.localStorage.getItem("novel-content");
+      if (content) {
+        setInitialContent(JSON.parse(content));
+        return;
+      }
+    } catch {
+      // If persisted content is malformed, reset and continue with defaults.
+      window.localStorage.removeItem("novel-content");
+    }
+    setInitialContent(defaultEditorContent);
   }, []);
 
   if (!initialContent) return null;
 
   return (
     <div className="relative w-full max-w-screen-lg">
-      <div className="flex absolute right-5 top-5 z-10 mb-5 gap-2">
-        <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">{saveStatus}</div>
-        <div className={charsCount ? "rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground" : "hidden"}>
-          {charsCount} Words
-        </div>
-      </div>
       <EditorRoot>
         <EditorContent
           initialContent={initialContent}
@@ -100,6 +103,13 @@ const TailwindAdvancedEditor = () => {
           }}
           slotAfter={<ImageResizer />}
         >
+          <div className="flex absolute right-5 top-5 z-10 mb-5 items-center gap-2">
+            <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">{saveStatus}</div>
+            <div className={charsCount ? "rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground" : "hidden"}>
+              {charsCount} Words
+            </div>
+            <Menu />
+          </div>
           <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
             <EditorCommandEmpty className="px-2 text-muted-foreground">No results</EditorCommandEmpty>
             <EditorCommandList>

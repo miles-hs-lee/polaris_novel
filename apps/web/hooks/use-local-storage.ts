@@ -9,17 +9,27 @@ const useLocalStorage = <T>(
 
   useEffect(() => {
     // Retrieve from localStorage
-    const item = window.localStorage.getItem(key);
-    if (item) {
-      setStoredValue(JSON.parse(item));
+    try {
+      const item = window.localStorage.getItem(key);
+      if (item) {
+        setStoredValue(JSON.parse(item));
+      }
+    } catch {
+      // Recover from stale or malformed storage value.
+      window.localStorage.removeItem(key);
+      setStoredValue(initialValue);
     }
-  }, [key]);
+  }, [key, initialValue]);
 
   const setValue = (value: T) => {
     // Save state
     setStoredValue(value);
     // Save to localStorage
-    window.localStorage.setItem(key, JSON.stringify(value));
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      // Ignore storage write failures (quota/private mode) and keep in-memory state.
+    }
   };
   return [storedValue, setValue];
 };
