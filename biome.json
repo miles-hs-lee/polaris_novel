@@ -10,7 +10,10 @@
       ".turbo",
       "**/dist",
       "**/out",
-      ".next"
+      ".next",
+      "**/.next/**",
+      ".vercel",
+      "**/.vercel/**"
     ]
   },
   "organizeImports": {

@@ -49,3 +49,8 @@ packages/*/dist
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# local tooling cache
+/.cache/
+/.corepack/
+/.pnpm-global/
