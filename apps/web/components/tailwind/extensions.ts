@@ -114,28 +114,15 @@ const definitionDescription = DefinitionDescription.configure({
   },
 });
 const table = TiptapTable.configure({
-  resizable: true,
+  resizable: false,
   allowTableNodeSelection: true,
-  lastColumnResizable: true,
   HTMLAttributes: {
-    class: cx("w-full table-fixed border-collapse"),
+    class: cx("not-prose w-full border-collapse"),
   },
 });
-const tableRow = TiptapTableRow.configure({
-  HTMLAttributes: {
-    class: cx("border-b border-muted"),
-  },
-});
-const tableHeader = TiptapTableHeader.configure({
-  HTMLAttributes: {
-    class: cx("border border-muted bg-muted px-3 py-2 text-left align-top font-semibold"),
-  },
-});
-const tableCell = TiptapTableCell.configure({
-  HTMLAttributes: {
-    class: cx("border border-muted px-3 py-2 align-top"),
-  },
-});
+const tableRow = TiptapTableRow;
+const tableHeader = TiptapTableHeader;
+const tableCell = TiptapTableCell;
 
 const horizontalRule = HorizontalRule.configure({
   HTMLAttributes: {
