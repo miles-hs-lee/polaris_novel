@@ -18,6 +18,8 @@
     "@radix-ui/react-separator": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",
     "@ai-sdk/react": "^3.0.107",
+    "@tiptap/extension-collaboration": "2.11.2",
+    "@tiptap/extension-collaboration-cursor": "2.11.2",
     "@tailwindcss/typography": "^0.5.19",
     "@vercel/analytics": "^1.6.1",
     "@vercel/blob": "^2.3.0",
@@ -43,6 +45,8 @@
     "ts-pattern": "^5.0.8",
     "typescript": "^5.4.2",
     "use-debounce": "^10.0.0",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.27",
     "zod": "^3.25.76"
   },
   "devDependencies": {

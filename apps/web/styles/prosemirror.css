@@ -230,3 +230,28 @@ span[style] > strong {
 mark[style] > strong {
   color: inherit;
 }
+
+.collaboration-cursor__caret {
+  border-left: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+}
+
+.collaboration-cursor__label {
+  background-color: currentColor;
+  border-radius: 0.375rem;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  left: -1px;
+  line-height: 1;
+  padding: 0.2rem 0.35rem;
+  position: absolute;
+  top: -1.4em;
+  user-select: none;
+  white-space: nowrap;
+}

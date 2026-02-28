@@ -1,5 +1,7 @@
 "use client";
 import { defaultEditorContent } from "@/lib/content";
+import { LocalBroadcastProvider } from "@/lib/collab/local-provider";
+import { getLocalCollabUser } from "@/lib/collab/user";
 import {
   EditorCommand,
   EditorCommandEmpty,
@@ -9,14 +11,14 @@ import {
   type EditorInstance,
   EditorRoot,
   ImageResizer,
-  type JSONContent,
   handleCommandNavigation,
   handleImageDrop,
   handleImagePaste,
 } from "novel";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { defaultExtensions } from "./extensions";
+import * as Y from "yjs";
+import { createExtensions } from "./extensions";
 import { ColorSelector } from "./selectors/color-selector";
 import { LinkSelector } from "./selectors/link-selector";
 import { MathSelector } from "./selectors/math-selector";
@@ -31,17 +33,38 @@ import { slashCommand, suggestionItems } from "./slash-command";
 
 const hljs = require("highlight.js");
 
-const extensions = [...defaultExtensions, slashCommand];
+type TailwindAdvancedEditorProps = {
+  docId: string;
+};
 
-const TailwindAdvancedEditor = () => {
-  const [initialContent, setInitialContent] = useState<null | JSONContent>(null);
+const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
   const [saveStatus, setSaveStatus] = useState("Saved");
-  const [charsCount, setCharsCount] = useState();
+  const [syncStatus, setSyncStatus] = useState<"connecting" | "disconnected" | "synced">("connecting");
+  const [charsCount, setCharsCount] = useState<number>();
 
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
+  const bootstrapTimerRef = useRef<number | null>(null);
+  const [collab, setCollab] = useState<{
+    doc: Y.Doc;
+    provider: LocalBroadcastProvider;
+  } | null>(null);
+
+  const collabUser = useMemo(() => getLocalCollabUser(), []);
+  const extensions = useMemo(() => {
+    if (!collab) return null;
+
+    return [
+      ...createExtensions({
+        doc: collab.doc,
+        provider: collab.provider,
+        user: collabUser,
+      }),
+      slashCommand,
+    ];
+  }, [collab, collabUser]);
 
   //Apply Codeblock Highlighting on the HTML from editor.getHTML()
   const highlightCodeblocks = (content: string) => {
@@ -64,26 +87,52 @@ const TailwindAdvancedEditor = () => {
   }, 500);
 
   useEffect(() => {
-    try {
-      const content = window.localStorage.getItem("novel-content");
-      if (content) {
-        setInitialContent(JSON.parse(content));
-        return;
-      }
-    } catch {
-      // If persisted content is malformed, reset and continue with defaults.
-      window.localStorage.removeItem("novel-content");
-    }
-    setInitialContent(defaultEditorContent);
-  }, []);
+    setSyncStatus("connecting");
+    setCollab(null);
 
-  if (!initialContent) return null;
+    const doc = new Y.Doc();
+    const provider = new LocalBroadcastProvider({ doc, docId });
+
+    setCollab({ doc, provider });
+
+    const handleStatus = ({ status }: { status: "connected" | "disconnected" }) => {
+      setSyncStatus(status === "connected" ? "connecting" : "disconnected");
+    };
+    const handleSynced = () => {
+      setSyncStatus("synced");
+    };
+
+    provider.on("status", handleStatus);
+    provider.on("synced", handleSynced);
+
+    if (provider.restoredFromSnapshot) {
+      setSyncStatus("synced");
+    }
+
+    return () => {
+      provider.off("status", handleStatus);
+      provider.off("synced", handleSynced);
+
+      if (bootstrapTimerRef.current) {
+        window.clearTimeout(bootstrapTimerRef.current);
+        bootstrapTimerRef.current = null;
+      }
+
+      provider.destroy();
+      doc.destroy();
+      setCollab((current) => (current?.provider === provider ? null : current));
+    };
+  }, [docId]);
+
+  const syncBadgeLabel =
+    syncStatus === "synced" ? "Synced" : syncStatus === "connecting" ? "Connecting..." : "Disconnected";
+
+  if (!collab || !extensions) return null;
 
   return (
     <div className="relative w-full max-w-screen-lg">
       <EditorRoot>
         <EditorContent
-          initialContent={initialContent}
           extensions={extensions}
           className="relative min-h-[500px] w-full max-w-screen-lg border-muted bg-background sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:shadow-lg"
           editorProps={{
@@ -97,6 +146,23 @@ const TailwindAdvancedEditor = () => {
                 "prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full",
             },
           }}
+          onCreate={({ editor }) => {
+            setCharsCount(editor.storage.characterCount.words());
+
+            if (bootstrapTimerRef.current) {
+              window.clearTimeout(bootstrapTimerRef.current);
+            }
+
+            bootstrapTimerRef.current = window.setTimeout(() => {
+              if (collab.provider.restoredFromSnapshot) return;
+              if (collab.provider.hasRemoteUpdates()) return;
+              if (collab.provider.getPeerCount() > 0) return;
+
+              if (editor.isEmpty) {
+                editor.commands.setContent(defaultEditorContent);
+              }
+            }, 400);
+          }}
           onUpdate={({ editor }) => {
             debouncedUpdates(editor);
             setSaveStatus("Unsaved");
@@ -104,6 +170,7 @@ const TailwindAdvancedEditor = () => {
           slotAfter={<ImageResizer />}
         >
           <div className="flex absolute right-5 top-5 z-10 mb-5 items-center gap-2">
+            <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">{syncBadgeLabel}</div>
             <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">{saveStatus}</div>
             <div className={charsCount ? "rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground" : "hidden"}>
               {charsCount} Words

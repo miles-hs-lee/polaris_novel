@@ -25,10 +25,29 @@ import {
   UploadImagesPlugin,
   Youtube,
 } from "novel";
+import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+import type { Awareness } from "y-protocols/awareness";
+import type { Doc as YDoc } from "yjs";
 
 import { cx } from "class-variance-authority";
 import { common, createLowlight } from "lowlight";
 import { Markdown } from "tiptap-markdown";
+
+type CollaborationProvider = {
+  awareness: Awareness;
+  off: (event: string, callback: (...args: unknown[]) => void) => void;
+  on: (event: string, callback: (...args: unknown[]) => void) => void;
+};
+
+export type CollaborationConfig = {
+  doc: YDoc;
+  provider: CollaborationProvider;
+  user: {
+    color: string;
+    name: string;
+  };
+};
 
 //TODO I am using cx here to get tailwind autocomplete working, idk if someone else can write a regex to just capture the class key in objects
 const aiHighlight = AIHighlight;
@@ -96,45 +115,47 @@ const horizontalRule = HorizontalRule.configure({
   },
 });
 
-const starterKit = StarterKit.configure({
-  bulletList: {
-    HTMLAttributes: {
-      class: cx("list-disc list-outside leading-3 -mt-2"),
+const createStarterKit = (isCollaborationMode: boolean) =>
+  StarterKit.configure({
+    bulletList: {
+      HTMLAttributes: {
+        class: cx("list-disc list-outside leading-3 -mt-2"),
+      },
     },
-  },
-  orderedList: {
-    HTMLAttributes: {
-      class: cx("list-decimal list-outside leading-3 -mt-2"),
+    orderedList: {
+      HTMLAttributes: {
+        class: cx("list-decimal list-outside leading-3 -mt-2"),
+      },
     },
-  },
-  listItem: {
-    HTMLAttributes: {
-      class: cx("leading-normal -mb-2"),
+    listItem: {
+      HTMLAttributes: {
+        class: cx("leading-normal -mb-2"),
+      },
     },
-  },
-  blockquote: {
-    HTMLAttributes: {
-      class: cx("border-l-4 border-primary"),
+    blockquote: {
+      HTMLAttributes: {
+        class: cx("border-l-4 border-primary"),
+      },
     },
-  },
-  codeBlock: {
-    HTMLAttributes: {
-      class: cx("rounded-md bg-muted text-muted-foreground border p-5 font-mono font-medium"),
+    codeBlock: {
+      HTMLAttributes: {
+        class: cx("rounded-md bg-muted text-muted-foreground border p-5 font-mono font-medium"),
+      },
     },
-  },
-  code: {
-    HTMLAttributes: {
-      class: cx("rounded-md bg-muted  px-1.5 py-1 font-mono font-medium"),
-      spellcheck: "false",
+    code: {
+      HTMLAttributes: {
+        class: cx("rounded-md bg-muted  px-1.5 py-1 font-mono font-medium"),
+        spellcheck: "false",
+      },
     },
-  },
-  horizontalRule: false,
-  dropcursor: {
-    color: "#DBEAFE",
-    width: 4,
-  },
-  gapcursor: false,
-});
+    horizontalRule: false,
+    dropcursor: {
+      color: "#DBEAFE",
+      width: 4,
+    },
+    gapcursor: false,
+    history: isCollaborationMode ? false : undefined,
+  });
 
 const codeBlockLowlight = CodeBlockLowlight.configure({
   // configure lowlight: common /  all / use highlightJS in case there is a need to specify certain language grammars only
@@ -178,30 +199,47 @@ const markdownExtension = Markdown.configure({
   transformCopiedText: false,
 });
 
-export const defaultExtensions = [
-  starterKit,
-  placeholder,
-  tiptapLink,
-  tiptapImage,
-  updatedImage,
-  taskList,
-  taskItem,
-  definitionList,
-  definitionTerm,
-  definitionDescription,
-  horizontalRule,
-  aiHighlight,
-  codeBlockLowlight,
-  youtube,
-  twitter,
-  mathematics,
-  characterCount,
-  TiptapUnderline,
-  markdownExtension,
-  HighlightExtension,
-  TextStyle,
-  Color,
-  CustomKeymap,
-  GlobalDragHandle,
-  DefinitionListDragGuard,
-];
+export const createExtensions = (collaboration?: CollaborationConfig) => {
+  const extensions = [
+    createStarterKit(Boolean(collaboration)),
+    placeholder,
+    tiptapLink,
+    tiptapImage,
+    updatedImage,
+    taskList,
+    taskItem,
+    definitionList,
+    definitionTerm,
+    definitionDescription,
+    horizontalRule,
+    aiHighlight,
+    codeBlockLowlight,
+    youtube,
+    twitter,
+    mathematics,
+    characterCount,
+    TiptapUnderline,
+    markdownExtension,
+    HighlightExtension,
+    TextStyle,
+    Color,
+    CustomKeymap,
+    GlobalDragHandle,
+    DefinitionListDragGuard,
+  ];
+
+  if (!collaboration) {
+    return extensions;
+  }
+
+  return [
+    ...extensions,
+    Collaboration.configure({
+      document: collaboration.doc,
+    }),
+    CollaborationCursor.configure({
+      provider: collaboration.provider,
+      user: collaboration.user,
+    }),
+  ];
+};

@@ -1,4 +1,7 @@
 {
+  "framework": "nextjs",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter novel-next-app build",
   "rewrites": [
     {
       "source": "/docs",
