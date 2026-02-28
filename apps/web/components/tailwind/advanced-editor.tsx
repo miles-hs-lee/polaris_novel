@@ -48,6 +48,7 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
   const bootstrapTimerRef = useRef<number | null>(null);
+  const hasLocalEditsRef = useRef(false);
   const [collab, setCollab] = useState<{
     doc: Y.Doc;
     provider: LocalBroadcastProvider;
@@ -90,6 +91,7 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
   useEffect(() => {
     setSyncStatus("connecting");
     setCollab(null);
+    hasLocalEditsRef.current = false;
 
     const doc = new Y.Doc();
     const provider = new LocalBroadcastProvider({ doc, docId });
@@ -155,16 +157,24 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
             }
 
             bootstrapTimerRef.current = window.setTimeout(() => {
+              if (hasLocalEditsRef.current) return;
               if (collab.provider.restoredFromSnapshot) return;
               if (collab.provider.hasRemoteUpdates()) return;
               if (collab.provider.getPeerCount() > 0) return;
 
-              if (editor.isEmpty) {
+              const firstNode = editor.state.doc.firstChild;
+              const isTrulyBlankParagraphDoc =
+                editor.state.doc.childCount === 1 &&
+                firstNode?.type.name === "paragraph" &&
+                firstNode.content.size === 0;
+
+              if (isTrulyBlankParagraphDoc) {
                 editor.commands.setContent(defaultEditorContent);
               }
             }, 400);
           }}
           onUpdate={({ editor }) => {
+            hasLocalEditsRef.current = true;
             debouncedUpdates(editor);
             setSaveStatus("Unsaved");
           }}
