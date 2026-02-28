@@ -90,6 +90,23 @@ export const suggestionItems = createSuggestionItems([
     },
   },
   {
+    title: "Definition List",
+    description: "Create a term with one or more definitions.",
+    searchTerms: ["definition", "glossary", "dl", "dt", "dd"],
+    icon: <List size={18} />,
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .setDefinitionList({
+          term: "Term",
+          description: "Definition",
+        })
+        .run();
+    },
+  },
+  {
     title: "Quote",
     description: "Capture a quote.",
     searchTerms: ["blockquote"],

@@ -12,6 +12,8 @@ import TiptapUnderline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
 import { Markdown } from "tiptap-markdown";
 import CustomKeymap from "./custom-keymap";
+import { DefinitionListDragGuard } from "./definition-list-drag-guard";
+import { DefinitionDescription, DefinitionList, DefinitionTerm } from "./definition-list";
 import { ImageResizer } from "./image-resizer";
 import { Twitter } from "./twitter";
 import { Mathematics } from "./mathematics";
@@ -85,4 +87,8 @@ export {
   Mathematics,
   CharacterCount,
   GlobalDragHandle,
+  DefinitionListDragGuard,
+  DefinitionList,
+  DefinitionTerm,
+  DefinitionDescription,
 };

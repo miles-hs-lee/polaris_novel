@@ -115,6 +115,26 @@ ul[data-type="taskList"] li[data-checked="true"] > div > p {
   text-decoration-thickness: 2px;
 }
 
+/* Definition list */
+
+.ProseMirror dl[data-type="definitionList"] {
+  margin: 1rem 0;
+}
+
+.ProseMirror dt[data-type="definitionTerm"] {
+  font-weight: 600;
+  margin-top: 0.75rem;
+}
+
+.ProseMirror dd[data-type="definitionDescription"] {
+  margin-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.ProseMirror dd[data-type="definitionDescription"] > p {
+  margin: 0.25rem 0;
+}
+
 /* Overwrite tippy-box original max-width */
 
 .tippy-box {

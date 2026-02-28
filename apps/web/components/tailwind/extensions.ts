@@ -4,6 +4,10 @@ import {
   CodeBlockLowlight,
   Color,
   CustomKeymap,
+  DefinitionDescription,
+  DefinitionListDragGuard,
+  DefinitionList,
+  DefinitionTerm,
   GlobalDragHandle,
   HighlightExtension,
   HorizontalRule,
@@ -69,6 +73,21 @@ const taskItem = TaskItem.configure({
     class: cx("flex gap-2 items-start my-4"),
   },
   nested: true,
+});
+const definitionList = DefinitionList.configure({
+  HTMLAttributes: {
+    class: cx("my-4"),
+  },
+});
+const definitionTerm = DefinitionTerm.configure({
+  HTMLAttributes: {
+    class: cx("mt-3 font-semibold"),
+  },
+});
+const definitionDescription = DefinitionDescription.configure({
+  HTMLAttributes: {
+    class: cx("ml-5 mb-2 text-muted-foreground"),
+  },
 });
 
 const horizontalRule = HorizontalRule.configure({
@@ -167,6 +186,9 @@ export const defaultExtensions = [
   updatedImage,
   taskList,
   taskItem,
+  definitionList,
+  definitionTerm,
+  definitionDescription,
   horizontalRule,
   aiHighlight,
   codeBlockLowlight,
@@ -181,4 +203,5 @@ export const defaultExtensions = [
   Color,
   CustomKeymap,
   GlobalDragHandle,
+  DefinitionListDragGuard,
 ];
