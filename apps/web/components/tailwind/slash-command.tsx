@@ -8,6 +8,7 @@ import {
   List,
   ListOrdered,
   MessageSquarePlus,
+  Table as TableIcon,
   Text,
   TextQuote,
   Twitter,
@@ -87,6 +88,15 @@ export const suggestionItems = createSuggestionItems([
     icon: <ListOrdered size={18} />,
     command: ({ editor, range }) => {
       editor.chain().focus().deleteRange(range).toggleOrderedList().run();
+    },
+  },
+  {
+    title: "Table",
+    description: "Insert a table with 3 columns and 3 rows.",
+    searchTerms: ["table", "grid", "sheet", "row", "column"],
+    icon: <TableIcon size={18} />,
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
     },
   },
   {

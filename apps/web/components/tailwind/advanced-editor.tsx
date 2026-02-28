@@ -23,6 +23,7 @@ import { ColorSelector } from "./selectors/color-selector";
 import { LinkSelector } from "./selectors/link-selector";
 import { MathSelector } from "./selectors/math-selector";
 import { NodeSelector } from "./selectors/node-selector";
+import { TableSelector } from "./selectors/table-selector";
 import { Separator } from "./ui/separator";
 import Menu from "./ui/menu";
 
@@ -212,6 +213,7 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
             <Separator orientation="vertical" />
             <ColorSelector open={openColor} onOpenChange={setOpenColor} />
           </GenerativeMenuSwitch>
+          <TableSelector />
         </EditorContent>
       </EditorRoot>
     </div>

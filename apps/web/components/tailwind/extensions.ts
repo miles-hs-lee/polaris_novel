@@ -16,7 +16,12 @@ import {
   StarterKit,
   TaskItem,
   TaskList,
+  TableDragGuard,
   TextStyle,
+  TiptapTable,
+  TiptapTableCell,
+  TiptapTableHeader,
+  TiptapTableRow,
   TiptapImage,
   TiptapLink,
   TiptapUnderline,
@@ -106,6 +111,29 @@ const definitionTerm = DefinitionTerm.configure({
 const definitionDescription = DefinitionDescription.configure({
   HTMLAttributes: {
     class: cx("ml-5 mb-2 text-muted-foreground"),
+  },
+});
+const table = TiptapTable.configure({
+  resizable: true,
+  allowTableNodeSelection: true,
+  lastColumnResizable: true,
+  HTMLAttributes: {
+    class: cx("w-full table-fixed border-collapse"),
+  },
+});
+const tableRow = TiptapTableRow.configure({
+  HTMLAttributes: {
+    class: cx("border-b border-muted"),
+  },
+});
+const tableHeader = TiptapTableHeader.configure({
+  HTMLAttributes: {
+    class: cx("border border-muted bg-muted px-3 py-2 text-left align-top font-semibold"),
+  },
+});
+const tableCell = TiptapTableCell.configure({
+  HTMLAttributes: {
+    class: cx("border border-muted px-3 py-2 align-top"),
   },
 });
 
@@ -211,6 +239,10 @@ export const createExtensions = (collaboration?: CollaborationConfig) => {
     definitionList,
     definitionTerm,
     definitionDescription,
+    table,
+    tableRow,
+    tableHeader,
+    tableCell,
     horizontalRule,
     aiHighlight,
     codeBlockLowlight,
@@ -225,6 +257,7 @@ export const createExtensions = (collaboration?: CollaborationConfig) => {
     Color,
     CustomKeymap,
     GlobalDragHandle,
+    TableDragGuard,
     DefinitionListDragGuard,
   ];
 

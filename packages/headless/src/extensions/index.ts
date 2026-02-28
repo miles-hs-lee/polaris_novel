@@ -17,6 +17,8 @@ import { DefinitionDescription, DefinitionList, DefinitionTerm } from "./definit
 import { ImageResizer } from "./image-resizer";
 import { Twitter } from "./twitter";
 import { Mathematics } from "./mathematics";
+import { TiptapTable, TiptapTableCell, TiptapTableHeader, TiptapTableRow } from "./table";
+import { TableDragGuard } from "./table-drag-guard";
 import UpdatedImage from "./updated-image";
 
 import CharacterCount from "@tiptap/extension-character-count";
@@ -85,6 +87,11 @@ export {
   Youtube,
   Twitter,
   Mathematics,
+  TiptapTable,
+  TiptapTableRow,
+  TiptapTableHeader,
+  TiptapTableCell,
+  TableDragGuard,
   CharacterCount,
   GlobalDragHandle,
   DefinitionListDragGuard,
