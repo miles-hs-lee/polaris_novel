@@ -27,10 +27,23 @@ import Youtube from "@tiptap/extension-youtube";
 import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 
 const PlaceholderExtension = Placeholder.configure({
-  placeholder: ({ node }) => {
+  placeholder: ({ editor, node, pos }) => {
     if (node.type.name === "heading") {
       return `Heading ${node.attrs.level}`;
     }
+
+    if (node.type.name !== "paragraph") {
+      return "";
+    }
+
+    const $pos = editor.state.doc.resolve(pos);
+    for (let depth = $pos.depth; depth > 0; depth -= 1) {
+      const nodeName = $pos.node(depth).type.name;
+      if (nodeName === "tableCell" || nodeName === "tableHeader") {
+        return "";
+      }
+    }
+
     return "Press '/' for commands";
   },
   includeChildren: true,
