@@ -19,10 +19,8 @@
     "@radix-ui/react-separator": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",
     "@tailwindcss/typography": "^0.5.10",
-    "@upstash/ratelimit": "^1.0.1",
     "@vercel/analytics": "^1.2.2",
     "@vercel/blob": "^0.22.1",
-    "@vercel/kv": "^1.0.1",
     "ai": "^3.0.12",
     "autoprefixer": "^10.4.17",
     "class-variance-authority": "^0.7.0",
@@ -32,9 +30,9 @@
     "highlight.js": "^11.9.0",
     "lowlight": "^3.1.0",
     "lucide-react": "^0.358.0",
-    "next": "15.1.4",
+    "next": "15.5.12",
     "next-themes": "^0.2.1",
-    "novel": "workspace:^",
+    "novel": "^1.0.2",
     "openai": "^4.28.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -42,6 +40,7 @@
     "sonner": "^1.4.3",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
+    "tiptap-markdown": "^0.8.10",
     "tippy.js": "^6.3.7",
     "ts-pattern": "^5.0.8",
     "typescript": "^5.4.2",
@@ -52,7 +51,6 @@
     "@types/node": "20.11.24",
     "@types/react": "^18.2.61",
     "@types/react-dom": "18.2.19",
-    "tailwindcss": "^3.4.1",
-    "tsconfig": "workspace:*"
+    "tailwindcss": "^3.4.1"
   }
 }
