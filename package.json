@@ -22,6 +22,19 @@
     "turbo": "^2.3.3"
   },
   "packageManager": "pnpm@9.5.0",
+  "pnpm": {
+    "overrides": {
+      "brace-expansion": "^2.0.2",
+      "glob": "^10.5.0",
+      "katex": "^0.16.21",
+      "linkifyjs": "^4.3.2",
+      "markdown-it": "^14.1.1",
+      "mdast-util-to-hast": "^13.2.1",
+      "minimatch": "^9.0.7",
+      "svelte": "^5.53.5",
+      "sucrase": "^3.35.1"
+    }
+  },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@commitlint/cli": "^19.6.1",
