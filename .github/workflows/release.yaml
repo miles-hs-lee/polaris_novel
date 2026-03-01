@@ -1,4 +1,4 @@
-# This workflow will release the packages with Changesets
+# This workflow releases packages with Changesets.
 
 name: 🚀 Release
 
@@ -8,72 +8,56 @@ on:
       - main
   workflow_dispatch:
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   release:
     name: 🚀 Release
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node-version: [lts/*]
-        pnpm-version: [latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
     steps:
       - name: ⬇️ Checkout
-        id: checkout
-        uses: actions/checkout@v2.3.3
+        uses: actions/checkout@v4
         with:
-          token: ${{ env.GITHUB_TOKEN }}
           fetch-depth: 0
-
-      - name: 🟢 Setup node
-        id: setup-node
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
+          token: ${{ env.GITHUB_TOKEN }}
 
       - name: 🥡 Setup pnpm
-        id: setup-pnpm
-        uses: pnpm/action-setup@v2.1.0
+        uses: pnpm/action-setup@v4
         with:
-          version: ${{ matrix.pnpm-version }}
+          version: 9.5.0
           run_install: false
 
-      - name: 🎈 Get pnpm store directory
-        id: get-pnpm-cache-dir
-        run: |
-          echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
-
-      - name: 🔆 Cache pnpm modules
-        uses: actions/cache@v3
-        id: pnpm-cache
+      - name: 🟢 Setup Node
+        uses: actions/setup-node@v4
         with:
-          path: ${{ steps.get-pnpm-cache-dir.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
 
       - name: 🧩 Install Dependencies
-        id: install-dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build
-        id: build-the-mono-repo
         run: pnpm build
 
       - name: 📣 Create Release Pull Request or Publish to npm
-        id: changesets
         uses: changesets/action@v1
         with:
           title: "chore(release): version packages 🦋"
-          publish: pnpm publish:packages
-          version: pnpm version:packages
           commit: "chore(release): version packages 🦋 [skip ci]"
+          version: pnpm version:packages
+          publish: pnpm publish:packages
         env:
           GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ env.NPM_TOKEN }}
