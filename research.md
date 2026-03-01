@@ -187,23 +187,28 @@
 8. `DefinitionList`
 9. `DefinitionTerm`
 10. `DefinitionDescription`
-11. `HorizontalRule`
-12. `AIHighlight`
-13. `CodeBlockLowlight`
-14. `Youtube`
-15. `Twitter`
-16. `Mathematics`
-17. `CharacterCount`
-18. `TiptapUnderline`
-19. `Markdown`
-20. `Highlight`
-21. `TextStyle`
-22. `Color`
-23. `CustomKeymap`
-24. `GlobalDragHandle`
-25. `DefinitionListDragGuard`
-26. (collab 모드 추가) `Collaboration`
-27. (collab 모드 추가) `CollaborationCursor`
+11. `TiptapTable`
+12. `TiptapTableRow`
+13. `TiptapTableHeader`
+14. `TiptapTableCell`
+15. `HorizontalRule`
+16. `AIHighlight`
+17. `CodeBlockLowlight`
+18. `Youtube`
+19. `Twitter`
+20. `Mathematics`
+21. `CharacterCount`
+22. `TiptapUnderline`
+23. `Markdown`
+24. `Highlight`
+25. `TextStyle`
+26. `Color`
+27. `CustomKeymap`
+28. `GlobalDragHandle`
+29. `TableDragGuard`
+30. `DefinitionListDragGuard`
+31. (collab 모드 추가) `Collaboration`
+32. (collab 모드 추가) `CollaborationCursor`
 
 ---
 
@@ -370,9 +375,10 @@
 
 아래는 코드 기준으로 보이는 “정리 우선순위 후보”다.
 
-1. 브랜딩/메타데이터 잔존
-- `layout.tsx` title/description/metadataBase가 아직 Novel 기준
-- `next.config.js` redirect도 upstream 링크 다수 포함
+1. 브랜딩/메타데이터 잔존 (부분 해소 + 잔여 과제)
+- `layout.tsx` title/description은 Polaris 기준으로 갱신됨
+- 다만 `next.config.js` redirect(`/github`, `/feedback` 등)는 upstream 링크 다수 포함
+- `metadataBase`도 임시/개인 배포 URL로 보이므로 운영 도메인 확정 시 정리 필요
 
 2. AI UI/백엔드 불일치
 - AI 버튼/패널은 보이지만 `/api/generate`는 501
@@ -497,3 +503,234 @@
 3. 상대가 `sync-response`로 diff update 전달
 4. 문서 변경 시 `doc-update` 브로드캐스트
 5. 커서/사용자 상태는 `awareness-update`로 동기화
+
+---
+
+## 18. 변경 추적 기준선 (Upstream 대비)
+
+이번 업데이트에서는 “현재 워킹트리의 코드 상태”뿐 아니라, 업스트림 `novel` 기준선 이후 누적 변경까지 추적했다.
+
+- 기준 브랜치:
+  - local: `main`
+  - remote: `origin/main`
+  - upstream: `upstream/main`
+- 변경 추적 기준점(merge-base):
+  - `fa95098e66476c466faebb8211baa5869c101a9c`
+- 추적 범위:
+  - `fa95098e..main` (총 23개 커밋)
+
+---
+
+## 19. 누적 변경 통계 (merge-base -> main)
+
+정량 요약:
+
+1. 커밋 수: 23
+2. 변경 파일 수: 36
+3. 라인 변화: `+4663 / -2130`
+4. 변경 파일 분포:
+   - `apps/web`: 20개
+   - `packages/headless`: 8개
+   - repo root/문서/설정: 8개
+
+커밋 prefix 분포:
+
+- `feat`: 8
+- `fix`: 6
+- `style`: 2
+- `chore`: 5
+- `doc`: 2
+
+디렉터리 churn (dirstat, files 기준):
+
+- `packages/headless/src/extensions/`: 13.8%
+- `apps/web/` 하위 다수 영역 각각 2.7% ~ 8.3%
+- 협업(`apps/web/lib/collab/`)과 확장(`packages/headless/src/extensions/`)의 비중이 높다.
+
+---
+
+## 20. 커밋 타임라인 (상세 추적)
+
+아래는 기준점 이후 커밋을 시간순(오래된 -> 최신)으로 정리한 것이다.
+
+| 순서 | 커밋 | 날짜 | 타입 | 핵심 내용 | 파일/라인 요약 |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `891c841c` | 2026-02-28 | feat | import/export를 메뉴로 이동, 빌드 안정화 | 7 files, +170/-52 |
+| 2 | `7c844489` | 2026-02-28 | fix | Vercel preview 빌드 안정화 | 4 files, +24/-140 |
+| 3 | `6fd5453b` | 2026-02-28 | chore | Vercel 배포 author 정렬 | 메타성 커밋(실파일 변경 미미/없음) |
+| 4 | `fdbb6386` | 2026-02-28 | doc | README 단순화 | 1 file, +46/-80 |
+| 5 | `32a16fe9` | 2026-02-28 | chore | web 의존성 하드닝 | 4 files, +505/-979 |
+| 6 | `3d59d2d8` | 2026-02-28 | chore | headless 취약점 패치 | 3 files, +579/-635 |
+| 7 | `426ffb56` | 2026-03-01 | feat | definition list + markdown + drag handling | 10 files, +745/-94 |
+| 8 | `9a926b91` | 2026-03-01 | chore | 배포 author 정렬 | 메타성 커밋(실파일 변경 미미/없음) |
+| 9 | `f632bc05` | 2026-03-01 | feat | 로컬 CRDT 협업 + Vercel 정렬 | 11 files, +696/-82 |
+| 10 | `4814355d` | 2026-03-01 | chore | 로컬 캐시/아티팩트 ignore | 2 files, +10/-2 |
+| 11 | `536fc36e` | 2026-03-01 | doc | `research.md` 신설 | 1 file, +499 |
+| 12 | `45bf1f01` | 2026-03-01 | feat | Markdown table 편집 지원 | 12 files, +700 |
+| 13 | `f788a091` | 2026-03-01 | fix | 테이블 삽입 후 bootstrap overwrite 방지 | 1 file, +11/-1 |
+| 14 | `bf151a9f` | 2026-03-01 | fix | 테이블 셀 내부 slash placeholder 숨김 | 1 file, +14/-1 |
+| 15 | `d030565d` | 2026-03-01 | fix | 셀 선택 시 테이블 레이아웃 안정화 | 2 files, +7/-33 |
+| 16 | `207426e4` | 2026-03-01 | fix | placeholder style 범위 제한 | 1 file, +14/-2 |
+| 17 | `f4c7acaa` | 2026-03-01 | style | 테이블 인라인 메뉴 아이콘 전환 | 1 file, +82/-5 |
+| 18 | `b13b56f7` | 2026-03-01 | style | 테이블 툴바 spacing/visual 개선 | 1 file, +37/-52 |
+| 19 | `fc86f2e7` | 2026-03-01 | feat | Polaris 기본문서 개편 + 버블 충돌 완화 | 3 files, +139/-218 |
+| 20 | `84f9a69c` | 2026-03-01 | feat | 테이블 액션 tooltip 추가 | 4 files, +474/-38 |
+| 21 | `318a6631` | 2026-03-01 | fix | private mode bootstrap 안정화 | 2 files, +46/-14 |
+| 22 | `2e72b642` | 2026-03-01 | feat | 기본 문서 feature tour 확장 | 1 file, +131/-39 |
+| 23 | `c76fad54` | 2026-03-01 | feat | 새 문서/기능 소개 메뉴 액션 | 1 file, +72/-1 |
+
+요약:
+
+1. 2026-03-01에 기능 개발이 집중됐다.
+2. table/definition-list/collab 3축이 현재 코드 변화의 중심이다.
+3. 후반부 커밋은 “기능 추가 -> 회귀 보정(fix) -> UI polish(style)” 순으로 진행됐다.
+
+---
+
+## 21. 파일 단위 누적 변경 맵 (상위 churn)
+
+`pnpm-lock.yaml`을 제외한 누적 라인 변화 상위:
+
+| 파일 | 변화량 |
+| --- | --- |
+| `packages/headless/src/extensions/definition-list.ts` | +571 / -0 |
+| `research.md` | +499 / -0 |
+| `plan_table.md` | +347 / -0 |
+| `apps/web/lib/collab/local-provider.ts` | +267 / -0 |
+| `apps/web/lib/content.ts` | +208 / -201 |
+| `apps/web/components/tailwind/ui/menu.tsx` | +193 / -2 |
+| `apps/web/components/tailwind/selectors/table-selector.tsx` | +174 / -0 |
+| `apps/web/components/tailwind/extensions.ts` | +139 / -58 |
+| `apps/web/components/tailwind/advanced-editor.tsx` | +129 / -19 |
+| `apps/web/styles/prosemirror.css` | +104 / -3 |
+
+해석:
+
+1. 에디터 문법/모델 측 변화 중심은 `definition-list.ts`와 `mathematics.ts` 계열이다.
+2. 제품 UX 변화 중심은 `menu.tsx`, `table-selector.tsx`, `advanced-editor.tsx`다.
+3. 협업 기능은 `local-provider.ts`, `persistence.ts`, `user.ts`의 신설로 독립 축을 형성했다.
+
+---
+
+## 22. 영역별 변경 추적 상세
+
+## 22.1 협업 스택
+
+신설/핵심:
+
+- `apps/web/lib/collab/local-provider.ts` (신규)
+- `apps/web/lib/collab/persistence.ts` (신규)
+- `apps/web/lib/collab/user.ts` (신규)
+- `apps/web/components/tailwind/advanced-editor.tsx` (통합)
+
+핵심 변화:
+
+1. BroadcastChannel 기반 sync 프로토콜 도입.
+2. Yjs snapshot 복원/저장으로 탭 재오픈 지속성 확보.
+3. `private mode`에서 스토리지 접근 실패 시 bootstrap/restore 동작을 깨지 않게 수정.
+
+## 22.2 테이블 스택
+
+신설/핵심:
+
+- `packages/headless/src/extensions/table.ts` (신규)
+- `packages/headless/src/extensions/table-drag-guard.ts` (신규)
+- `apps/web/components/tailwind/selectors/table-selector.tsx` (신규)
+- `apps/web/components/tailwind/ui/tooltip.tsx` (신규)
+
+핵심 변화:
+
+1. slash로 table 삽입.
+2. inline table toolbar(행/열/병합/분할/삭제) 도입.
+3. 셀 선택/placeholder/버블 충돌 회귀를 다수 fix 커밋으로 보정.
+4. 아이콘/툴팁/간격 개선으로 조작 discoverability 향상.
+
+## 22.3 Definition List 스택
+
+신설/핵심:
+
+- `packages/headless/src/extensions/definition-list.ts`
+- `packages/headless/src/extensions/definition-list-drag-guard.ts`
+
+핵심 변화:
+
+1. 스키마 + 명령(`setDefinitionList`) 추가.
+2. markdown serialize/parse 커스텀 도입.
+3. drag-handle 시 그룹 단위 이동 안정성 보정.
+4. `Enter` 키 기반 그룹 확장 동작 구현.
+
+## 22.4 문서/메뉴 UX
+
+핵심:
+
+- `apps/web/components/tailwind/ui/menu.tsx`
+- `apps/web/lib/content.ts`
+
+변화:
+
+1. 문서 메뉴에 “새 문서”, “기능 소개”, MD import/export, JSON export 통합.
+2. 기본 콘텐츠를 기능 데모 중심으로 확장.
+3. 최신 워킹트리에서는 수식 markdown round-trip 테스트 샘플 블록을 기본 콘텐츠에 추가 중이다(미커밋).
+
+## 22.5 수식 파싱/직렬화
+
+핵심:
+
+- `packages/headless/src/extensions/mathematics.ts`
+
+변화:
+
+1. inline math markdown 룰 주입(`$...$`) 로직이 크게 확장됨.
+2. 오탐 방지 규칙:
+   - escape(`\$`)
+   - 통화 표기(`$12`)
+   - `$$...$$` 경계
+   - whitespace/닫힘 delimiter 검증
+3. parseHTML/serialize 안정성 개선(`latex`, `data-latex`, text fallback).
+4. 워킹트리 기준으로 아직 미커밋 상태이며, 현재 diff는 `+292/-9` 규모다.
+
+---
+
+## 23. 현재 워킹트리(미커밋) 추적
+
+2026-03-01 현재 `git status` 기준:
+
+### 23.1 Modified
+
+1. `apps/web/lib/content.ts`
+- 수식 Markdown round-trip 점검용 샘플 섹션 추가 (`+85` 근사).
+
+2. `packages/headless/src/extensions/mathematics.ts`
+- inline math markdown parser/serializer 고도화 (`+292/-9`).
+
+### 23.2 Untracked
+
+1. `plan_latex.md` (327 lines)
+2. `plan_test.md` (503 lines)
+
+의미:
+
+1. 현재 브랜치 HEAD 기준 기능은 이미 안정화됐지만, 수식 파싱 강화 작업이 워킹트리에서 추가 진행 중이다.
+2. 문서성 산출물(`plan_latex.md`, `plan_test.md`)은 아직 커밋되지 않았다.
+
+---
+
+## 24. 연구 문서 자체 업데이트 이력
+
+`research.md`는 아래 순서로 진화했다.
+
+1. `536fc36e`에서 최초 대규모 분석 문서로 생성.
+2. 이번 업데이트에서:
+   - 실제 확장 순서(테이블/drag guard 포함) 반영
+   - 리스크 섹션의 stale 정보(메타데이터) 수정
+   - 업스트림 대비 전체 변경 추적(통계/타임라인/파일 맵) 추가
+   - 미커밋 워킹트리 변경 현황을 별도 섹션으로 명시
+
+---
+
+## 25. 현재 기준 결론
+
+1. 이 저장소는 upstream `novel`에서 Polaris 제품 방향으로 빠르게 분기되었고, 핵심 분기축은 `collab + table + definition-list + UX polish`다.
+2. 구조적으로는 `apps/web`(제품)과 `packages/headless`(확장/코어)의 책임 분리가 유지되고 있다.
+3. 현재 진행 중인 미커밋 변화는 “수식 markdown 정확도” 향상 방향이며, 문서 측면에서는 테스트/수식 계획 문서가 추가된 상태다.
+4. 다음 안정화 단계는 테스트 자동화(`plan_test.md`)와 수식 round-trip 검증 체계화가 가장 효과적이다.

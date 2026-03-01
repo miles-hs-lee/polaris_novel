@@ -143,6 +143,91 @@ export const defaultEditorContent = {
     {
       type: "heading",
       attrs: { level: 3 },
+      content: [{ type: "text", text: "Math Markdown Round-trip Cases" }],
+    },
+    {
+      type: "paragraph",
+      content: [
+        { type: "text", text: "아래 케이스를 MD로 Export/Import 하면서 인라인 수식 파싱이 의도대로 동작하는지 확인해보세요." },
+      ],
+    },
+    {
+      type: "orderedList",
+      attrs: { tight: true, start: 1 },
+      content: [
+        {
+          type: "listItem",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                { type: "text", text: "기본 인라인 수식: " },
+                { type: "math", attrs: { latex: "x^2 + y^2 = z^2" } },
+              ],
+            },
+          ],
+        },
+        {
+          type: "listItem",
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: "Escape 텍스트(수식으로 변환되면 안 됨): \\$x\\$" }],
+            },
+          ],
+        },
+        {
+          type: "listItem",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                { type: "text", text: "코드스팬(수식 파싱 금지): " },
+                { type: "text", marks: [{ type: "code" }], text: "$x$" },
+              ],
+            },
+          ],
+        },
+        {
+          type: "listItem",
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: "통화 표기(오탐 금지): Price is $12$ today." }],
+            },
+          ],
+        },
+        {
+          type: "listItem",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                { type: "text", text: "혼합 문장: Price is $12$ and math is " },
+                { type: "math", attrs: { latex: "x^2" } },
+                { type: "text", text: "." },
+              ],
+            },
+          ],
+        },
+        {
+          type: "listItem",
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: "더블 달러 텍스트(인라인 수식 오탐 금지): $$x$$ and " }],
+            },
+            {
+              type: "paragraph",
+              content: [{ type: "math", attrs: { latex: "y" } }],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      type: "heading",
+      attrs: { level: 3 },
       content: [{ type: "text", text: "Embeds (YouTube / Twitter)" }],
     },
     {
