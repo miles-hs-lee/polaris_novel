@@ -1,7 +1,8 @@
 "use client";
 
+import { defaultEditorContent } from "@/lib/content";
 import { useEffect, useState } from "react";
-import { Check, Download, FileJson, FileUp, Menu as MenuIcon, Monitor, Moon, SunDim } from "lucide-react";
+import { BookOpen, Check, Download, FileJson, FilePlus, FileUp, Menu as MenuIcon, Monitor, Moon, SunDim } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEditor } from "novel";
 import { toast } from "sonner";
@@ -56,6 +57,11 @@ const downloadText = (filename: string, content: string, contentType: string) =>
   URL.revokeObjectURL(url);
 };
 
+const emptyEditorContent = {
+  type: "doc",
+  content: [{ type: "paragraph" }],
+};
+
 export default function Menu() {
   // const { font: currentFont, setFont } = useContext(AppContext);
   const [mounted, setMounted] = useState(false);
@@ -92,6 +98,42 @@ export default function Menu() {
       }
     };
     input.click();
+  };
+
+  const handleCreateNewDocument = () => {
+    if (!editor) {
+      toast.error("에디터가 아직 준비되지 않았습니다.");
+      return;
+    }
+
+    const confirmed = window.confirm("현재 문서를 지우고 새 문서를 만들까요?");
+    if (!confirmed) return;
+
+    try {
+      editor.commands.setContent(emptyEditorContent, true);
+      editor.commands.focus("start");
+      toast.success("새 문서를 만들었습니다.");
+    } catch {
+      toast.error("새 문서를 만들지 못했습니다.");
+    }
+  };
+
+  const handleLoadFeatureDocument = () => {
+    if (!editor) {
+      toast.error("에디터가 아직 준비되지 않았습니다.");
+      return;
+    }
+
+    const confirmed = window.confirm("현재 문서를 기능 소개 문서로 바꿀까요?");
+    if (!confirmed) return;
+
+    try {
+      editor.commands.setContent(defaultEditorContent, true);
+      editor.commands.focus("start");
+      toast.success("기능 소개 문서를 불러왔습니다.");
+    } catch {
+      toast.error("기능 소개 문서를 불러오지 못했습니다.");
+    }
   };
 
   const handleExportMarkdown = () => {
@@ -144,6 +186,35 @@ export default function Menu() {
             </button>
           ))}
         </div> */}
+        <p className="p-2 text-xs font-medium text-muted-foreground">Document</p>
+        <Button
+          variant="ghost"
+          className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
+          onClick={handleCreateNewDocument}
+          disabled={disabled}
+        >
+          <div className="flex items-center space-x-2">
+            <div className="rounded-sm border p-1">
+              <FilePlus className="h-4 w-4" />
+            </div>
+            <span>새 문서</span>
+          </div>
+        </Button>
+        <Button
+          variant="ghost"
+          className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
+          onClick={handleLoadFeatureDocument}
+          disabled={disabled}
+        >
+          <div className="flex items-center space-x-2">
+            <div className="rounded-sm border p-1">
+              <BookOpen className="h-4 w-4" />
+            </div>
+            <span>기능 소개</span>
+          </div>
+        </Button>
+
+        <div className="my-1 h-px bg-border" />
         <p className="p-2 text-xs font-medium text-muted-foreground">Import / Export</p>
         <Button
           variant="ghost"
