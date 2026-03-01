@@ -73,6 +73,33 @@ export const suggestionItems = createSuggestionItems([
     },
   },
   {
+    title: "Heading 4",
+    description: "Compact subsection heading.",
+    searchTerms: ["h4", "subsection", "heading"],
+    icon: <Heading3 size={18} />,
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).setNode("heading", { level: 4 }).run();
+    },
+  },
+  {
+    title: "Heading 5",
+    description: "Minor subsection heading.",
+    searchTerms: ["h5", "subsection", "heading"],
+    icon: <Heading3 size={18} />,
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).setNode("heading", { level: 5 }).run();
+    },
+  },
+  {
+    title: "Heading 6",
+    description: "Smallest heading level.",
+    searchTerms: ["h6", "subsection", "heading"],
+    icon: <Heading3 size={18} />,
+    command: ({ editor, range }) => {
+      editor.chain().focus().deleteRange(range).setNode("heading", { level: 6 }).run();
+    },
+  },
+  {
     title: "Bullet List",
     description: "Create a simple bullet list.",
     searchTerms: ["unordered", "point"],

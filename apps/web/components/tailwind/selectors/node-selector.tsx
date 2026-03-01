@@ -52,6 +52,24 @@ const items: SelectorItem[] = [
     isActive: (editor) => editor.isActive("heading", { level: 3 }),
   },
   {
+    name: "Heading 4",
+    icon: Heading3,
+    command: (editor) => editor.chain().focus().clearNodes().toggleHeading({ level: 4 }).run(),
+    isActive: (editor) => editor.isActive("heading", { level: 4 }),
+  },
+  {
+    name: "Heading 5",
+    icon: Heading3,
+    command: (editor) => editor.chain().focus().clearNodes().toggleHeading({ level: 5 }).run(),
+    isActive: (editor) => editor.isActive("heading", { level: 5 }),
+  },
+  {
+    name: "Heading 6",
+    icon: Heading3,
+    command: (editor) => editor.chain().focus().clearNodes().toggleHeading({ level: 6 }).run(),
+    isActive: (editor) => editor.isActive("heading", { level: 6 }),
+  },
+  {
     name: "To-do List",
     icon: CheckSquare,
     command: (editor) => editor.chain().focus().clearNodes().toggleTaskList().run(),
