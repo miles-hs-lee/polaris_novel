@@ -105,6 +105,37 @@ export const TableSelector = () => {
 
   if (!editor) return null;
 
+  const renderActionGroup = (actions: TableAction[]) => (
+    <div className="flex items-center gap-0.5 rounded-md border border-muted bg-muted/30 p-0.5">
+      {actions.map((item) => {
+        const isActive = item.isActive?.(editor) ?? false;
+
+        return (
+          <Button
+            key={item.label}
+            variant="ghost"
+            size="sm"
+            type="button"
+            title={item.label}
+            aria-label={item.label}
+            aria-pressed={item.isActive ? isActive : undefined}
+            className={cn(
+              "h-7 w-7 rounded-sm p-0 text-muted-foreground transition-colors hover:text-foreground",
+              {
+                "bg-accent text-foreground": isActive,
+                "hover:bg-destructive/10 hover:text-destructive": item.tone === "danger",
+              },
+            )}
+            disabled={!item.isEnabled(editor)}
+            onClick={() => item.command(editor)}
+          >
+            <item.icon className="h-3.5 w-3.5" />
+          </Button>
+        );
+      })}
+    </div>
+  );
+
   return (
     <EditorBubble
       shouldShow={({ editor: currentEditor }) => {
@@ -116,59 +147,13 @@ export const TableSelector = () => {
         );
       }}
       tippyOptions={{ placement: "top-start" }}
-      className="flex w-fit max-w-[95vw] items-center gap-1 overflow-x-auto rounded-md border border-muted bg-background p-1 shadow-xl"
+      className="flex w-fit max-w-[95vw] items-center gap-1.5 overflow-x-auto rounded-lg border border-muted/80 bg-background/95 px-1.5 py-1 shadow-xl backdrop-blur supports-[backdrop-filter]:bg-background/85"
     >
-      {INSERT_ACTIONS.map((item) => (
-        <Button
-          key={item.label}
-          variant="ghost"
-          size="sm"
-          type="button"
-          title={item.label}
-          aria-label={item.label}
-          className={cn("h-8 w-8 rounded-none p-0")}
-          disabled={!item.isEnabled(editor)}
-          onClick={() => item.command(editor)}
-        >
-          <item.icon className="h-4 w-4" />
-        </Button>
-      ))}
-      <Separator orientation="vertical" className="mx-0.5 h-5" />
-      {STRUCTURE_ACTIONS.map((item) => (
-        <Button
-          key={item.label}
-          variant="ghost"
-          size="sm"
-          type="button"
-          title={item.label}
-          aria-label={item.label}
-          className={cn("h-8 w-8 rounded-none p-0", {
-            "text-blue-500": item.isActive?.(editor),
-          })}
-          disabled={!item.isEnabled(editor)}
-          onClick={() => item.command(editor)}
-        >
-          <item.icon className="h-4 w-4" />
-        </Button>
-      ))}
-      <Separator orientation="vertical" className="mx-0.5 h-5" />
-      {DELETE_ACTIONS.map((item) => (
-        <Button
-          key={item.label}
-          variant="ghost"
-          size="sm"
-          type="button"
-          title={item.label}
-          aria-label={item.label}
-          className={cn("h-8 w-8 rounded-none p-0", {
-            "text-destructive hover:text-destructive": item.tone === "danger",
-          })}
-          disabled={!item.isEnabled(editor)}
-          onClick={() => item.command(editor)}
-        >
-          <item.icon className="h-4 w-4" />
-        </Button>
-      ))}
+      {renderActionGroup(INSERT_ACTIONS)}
+      <Separator orientation="vertical" className="h-5" />
+      {renderActionGroup(STRUCTURE_ACTIONS)}
+      <Separator orientation="vertical" className="h-5" />
+      {renderActionGroup(DELETE_ACTIONS)}
     </EditorBubble>
   );
 };
