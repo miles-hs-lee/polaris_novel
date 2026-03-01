@@ -22,6 +22,9 @@ export default defineConfig({
     ? undefined
     : {
         command: "pnpm --filter novel-next-app dev --port 3000",
+        env: {
+          BROWSERSLIST_IGNORE_OLD_DATA: "1",
+        },
         url: baseURL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
