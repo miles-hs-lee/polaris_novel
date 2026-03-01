@@ -140,7 +140,7 @@ export default function Menu() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Open menu">
+        <Button variant="ghost" size="icon" aria-label="Open menu" data-testid="menu-trigger">
           <MenuIcon width={16} />
         </Button>
       </PopoverTrigger>
@@ -213,6 +213,7 @@ export default function Menu() {
           className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
           onClick={handleExportMarkdown}
           disabled={disabled}
+          data-testid="menu-export-markdown"
         >
           <div className="flex items-center space-x-2">
             <div className="rounded-sm border p-1">
@@ -226,6 +227,7 @@ export default function Menu() {
           className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
           onClick={handleExportJson}
           disabled={disabled}
+          data-testid="menu-export-json"
         >
           <div className="flex items-center space-x-2">
             <div className="rounded-sm border p-1">
@@ -245,6 +247,7 @@ export default function Menu() {
             onClick={() => {
               applyAppearanceTheme(setTheme, theme);
             }}
+            data-testid={`appearance-theme-${theme.toLowerCase()}`}
           >
             <div className="flex items-center space-x-2">
               <div className="rounded-sm border  p-1">{icon}</div>

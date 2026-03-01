@@ -2,15 +2,16 @@ import TailwindAdvancedEditor from "@/components/tailwind/advanced-editor";
 import type { CollabMode } from "@/lib/collab/types";
 
 type PageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     doc?: string | string[];
     mode?: string | string[];
-  };
+  }>;
 };
 
-export default function Page({ searchParams }: PageProps) {
-  const rawDocId = searchParams?.doc;
-  const rawMode = searchParams?.mode;
+export default async function Page({ searchParams }: PageProps) {
+  const params = searchParams ? await searchParams : undefined;
+  const rawDocId = params?.doc;
+  const rawMode = params?.mode;
   const docId = Array.isArray(rawDocId) ? rawDocId[0] : rawDocId;
   const mode = Array.isArray(rawMode) ? rawMode[0] : rawMode;
   const normalizedDocId = docId?.trim() ? docId.trim() : "local-default";

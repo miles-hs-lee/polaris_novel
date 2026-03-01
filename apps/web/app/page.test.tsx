@@ -8,7 +8,7 @@ vi.mock("@/components/tailwind/advanced-editor", () => ({
 }));
 
 describe("page docId normalization", () => {
-  const getEditorProps = (element: ReturnType<typeof Page>) => {
+  const getEditorProps = (element: Awaited<ReturnType<typeof Page>>) => {
     const editorElement = element.props.children;
     return {
       docId: editorElement.props.docId as string,
@@ -16,33 +16,33 @@ describe("page docId normalization", () => {
     };
   };
 
-  it("uses local-default when doc query is missing", () => {
-    const element = Page({});
+  it("uses local-default when doc query is missing", async () => {
+    const element = await Page({});
     expect(getEditorProps(element).docId).toBe("local-default");
   });
 
-  it("uses first query value when doc is array", () => {
-    const element = Page({ searchParams: { doc: ["alpha", "beta"] } });
+  it("uses first query value when doc is array", async () => {
+    const element = await Page({ searchParams: Promise.resolve({ doc: ["alpha", "beta"] }) });
     expect(getEditorProps(element).docId).toBe("alpha");
   });
 
-  it("trims doc query text", () => {
-    const element = Page({ searchParams: { doc: "  alpha-doc  " } });
+  it("trims doc query text", async () => {
+    const element = await Page({ searchParams: Promise.resolve({ doc: "  alpha-doc  " }) });
     expect(getEditorProps(element).docId).toBe("alpha-doc");
   });
 
-  it("falls back when doc query is blank", () => {
-    const element = Page({ searchParams: { doc: "   " } });
+  it("falls back when doc query is blank", async () => {
+    const element = await Page({ searchParams: Promise.resolve({ doc: "   " }) });
     expect(getEditorProps(element).docId).toBe("local-default");
   });
 
-  it("uses liveblocks mode by default", () => {
-    const element = Page({});
+  it("uses liveblocks mode by default", async () => {
+    const element = await Page({});
     expect(getEditorProps(element).mode).toBe("liveblocks");
   });
 
-  it("supports explicit local mode", () => {
-    const element = Page({ searchParams: { mode: "local" } });
+  it("supports explicit local mode", async () => {
+    const element = await Page({ searchParams: Promise.resolve({ mode: "local" }) });
     expect(getEditorProps(element).mode).toBe("local");
   });
 });
