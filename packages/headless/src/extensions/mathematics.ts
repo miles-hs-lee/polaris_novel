@@ -229,6 +229,24 @@ const setupInlineMathMarkdownRule = (markdownit: MarkdownItLike) => {
   md.renderer.rules[MARKDOWN_INLINE_MATH_RULE] = renderInlineMathToken;
 };
 
+const getMathLatexFromElement = (element: HTMLElement) => {
+  return element.getAttribute("latex") ?? element.getAttribute("data-latex") ?? element.textContent ?? "";
+};
+
+const ensureMathLatexAttributes = (root: HTMLElement, nodeType = "math") => {
+  root.querySelectorAll(`span[data-type="${nodeType}"]`).forEach((candidate) => {
+    if (!isHTMLElement(candidate)) {
+      return;
+    }
+
+    if (candidate.getAttribute("latex") !== null || candidate.getAttribute("data-latex") !== null) {
+      return;
+    }
+
+    candidate.setAttribute("latex", candidate.textContent ?? "");
+  });
+};
+
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     LatexCommand: {
@@ -289,17 +307,7 @@ export const Mathematics = Node.create<MathematicsOptions>({
             setupInlineMathMarkdownRule(markdownit);
           },
           updateDOM: (element: HTMLElement) => {
-            element.querySelectorAll(`span[data-type="${this.name}"]`).forEach((candidate) => {
-              if (!isHTMLElement(candidate)) {
-                return;
-              }
-
-              if (candidate.getAttribute("latex") !== null || candidate.getAttribute("data-latex") !== null) {
-                return;
-              }
-
-              candidate.setAttribute("latex", candidate.textContent ?? "");
-            });
+            ensureMathLatexAttributes(element, this.name);
           },
         },
       },
@@ -384,7 +392,7 @@ export const Mathematics = Node.create<MathematicsOptions>({
             return false;
           }
 
-          const latex = node.getAttribute("latex") ?? node.getAttribute("data-latex") ?? node.textContent ?? "";
+          const latex = getMathLatexFromElement(node);
           return { latex };
         },
       },
@@ -451,3 +459,17 @@ export const Mathematics = Node.create<MathematicsOptions>({
     };
   },
 });
+
+export const __mathematicsTestUtils = {
+  ensureMathLatexAttributes,
+  findInlineMathClosingDelimiter,
+  getMathLatexFromElement,
+  hasUnescapedDollar,
+  isDigitCharCode,
+  isEscapedAt,
+  isWhitespaceCharCode,
+  normalizeInlineLatexForExport,
+  renderInlineMathToken,
+  setupInlineMathMarkdownRule,
+  tokenizeInlineMath,
+};

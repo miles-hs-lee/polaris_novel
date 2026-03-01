@@ -15,6 +15,7 @@ import CustomKeymap from "./custom-keymap";
 import { DefinitionListDragGuard } from "./definition-list-drag-guard";
 import { DefinitionDescription, DefinitionList, DefinitionTerm } from "./definition-list";
 import { ImageResizer } from "./image-resizer";
+import { resolvePlaceholderText } from "./placeholder-utils";
 import { Twitter } from "./twitter";
 import { Mathematics } from "./mathematics";
 import { TiptapTable, TiptapTableCell, TiptapTableHeader, TiptapTableRow } from "./table";
@@ -27,25 +28,7 @@ import Youtube from "@tiptap/extension-youtube";
 import GlobalDragHandle from "tiptap-extension-global-drag-handle";
 
 const PlaceholderExtension = Placeholder.configure({
-  placeholder: ({ editor, node, pos }) => {
-    if (node.type.name === "heading") {
-      return `Heading ${node.attrs.level}`;
-    }
-
-    if (node.type.name !== "paragraph") {
-      return "";
-    }
-
-    const $pos = editor.state.doc.resolve(pos);
-    for (let depth = $pos.depth; depth > 0; depth -= 1) {
-      const nodeName = $pos.node(depth).type.name;
-      if (nodeName === "tableCell" || nodeName === "tableHeader") {
-        return "";
-      }
-    }
-
-    return "Press '/' for commands";
-  },
+  placeholder: resolvePlaceholderText,
   includeChildren: true,
 });
 
@@ -111,4 +94,8 @@ export {
   DefinitionList,
   DefinitionTerm,
   DefinitionDescription,
+};
+
+export const __extensionsTestUtils = {
+  resolvePlaceholderText,
 };

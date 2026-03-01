@@ -31,43 +31,12 @@ import GenerativeMenuSwitch from "./generative/generative-menu-switch";
 import { uploadFn } from "./image-upload";
 import { TextButtons } from "./selectors/text-buttons";
 import { slashCommand, suggestionItems } from "./slash-command";
+import { isEditorDocumentEmpty, shouldBootstrapDefaultContent } from "@/lib/editor/bootstrap-guards";
 
 const hljs = require("highlight.js");
 
 type TailwindAdvancedEditorProps = {
   docId: string;
-};
-
-type JsonNode = {
-  type?: string;
-  text?: string;
-  content?: JsonNode[];
-};
-
-const EMPTY_SCAFFOLD_TYPES = new Set(["doc", "paragraph", "text", "hardBreak"]);
-
-const hasMeaningfulContent = (node: JsonNode): boolean => {
-  if (typeof node.text === "string" && node.text.trim().length > 0) {
-    return true;
-  }
-
-  if (node.type && !EMPTY_SCAFFOLD_TYPES.has(node.type)) {
-    return true;
-  }
-
-  if (!node.content || node.content.length === 0) {
-    return false;
-  }
-
-  return node.content.some((child) => hasMeaningfulContent(child));
-};
-
-const isEditorDocumentEmpty = (editor: EditorInstance) => {
-  const doc = editor.getJSON() as JsonNode;
-  return !hasMeaningfulContent({
-    type: "doc",
-    content: Array.isArray(doc.content) ? doc.content : [],
-  });
 };
 
 const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
@@ -187,10 +156,12 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
             }
 
             bootstrapTimerRef.current = window.setTimeout(() => {
-              if (collab.provider.restoredFromSnapshot) return;
-              if (collab.provider.hasRemoteUpdates()) return;
-              if (collab.provider.getPeerCount() > 0) return;
-              if (isEditorDocumentEmpty(editor)) {
+              if (shouldBootstrapDefaultContent({
+                restoredFromSnapshot: collab.provider.restoredFromSnapshot,
+                hasRemoteUpdates: collab.provider.hasRemoteUpdates(),
+                peerCount: collab.provider.getPeerCount(),
+                isEmpty: isEditorDocumentEmpty(editor),
+              })) {
                 editor.commands.setContent(defaultEditorContent);
               }
             }, 400);

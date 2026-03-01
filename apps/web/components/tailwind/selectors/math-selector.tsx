@@ -1,4 +1,5 @@
 import { Button } from "@/components/tailwind/ui/button";
+import { toggleMathSelection } from "@/lib/editor/math-toggle";
 import { cn } from "@/lib/utils";
 import { SigmaIcon } from "lucide-react";
 import { useEditor } from "novel";
@@ -13,17 +14,8 @@ export const MathSelector = () => {
       variant="ghost"
       size="sm"
       className="rounded-none w-12"
-      onClick={(evt) => {
-        if (editor.isActive("math")) {
-          editor.chain().focus().unsetLatex().run();
-        } else {
-          const { from, to } = editor.state.selection;
-          const latex = editor.state.doc.textBetween(from, to);
-
-          if (!latex) return;
-
-          editor.chain().focus().setLatex({ latex }).run();
-        }
+      onClick={() => {
+        toggleMathSelection(editor);
       }}
     >
       <SigmaIcon

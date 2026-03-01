@@ -3,6 +3,14 @@
 작성일: 2026-03-01 (KST)  
 분석 기준: `/Users/cnt-22-70004/Documents/Polaris Novel` 현재 코드베이스
 
+추적 기준(변경 이력):
+
+1. upstream merge-base: `fa95098e66476c466faebb8211baa5869c101a9c`
+2. 누적 추적 범위: `fa95098e..main` (23 commits, 36 files, `+4663/-2130`)
+3. 현재 워킹트리 미커밋 변경:
+- `apps/web/lib/content.ts`
+- `packages/headless/src/extensions/mathematics.ts`
+
 ---
 
 ## 1. 프로젝트 상세 분석
@@ -87,6 +95,10 @@
 5. API 안전성 리스크
 - 업로드 라우트는 헤더 기반 파일명 조합과 환경 변수 분기 로직이 있어 최소한의 계약 테스트가 필요하다.
 
+6. 변경 이력 기반 회귀 리스크
+- 최근 커밋이 `table + definition-list + collab + math` 축에 집중되어 있어, 단순 기능 테스트만으로는 회귀를 놓치기 쉽다.
+- 특히 “테이블 삽입 직후 bootstrap 덮어쓰기 방지”, “테이블 셀 내부 placeholder 숨김”, “private mode 복원 안정화”는 과거 실제 fix 이력 기반 회귀 포인트다.
+
 ## 1.4 현재 테스트 공백
 
 1. `*.test.*`, `*.spec.*`, `vitest/jest/playwright` 설정 파일 부재.
@@ -147,6 +159,17 @@
 3. P2
 - 스타일/아이콘 중심 컴포넌트, 사소한 유틸.
 
+## 2.5 변경 이력 기반 회귀 전략
+
+1. 최근 23개 커밋에서 실제로 수정된 영역을 “회귀 팩”으로 고정한다.
+2. 회귀 팩은 기능 축별로 분리한다.
+- `Regression Pack A`: table/placeholder/bubble/layout
+- `Regression Pack B`: definition-list parse/serialize/drag
+- `Regression Pack C`: collab bootstrap/snapshot/private mode
+- `Regression Pack D`: math inline parse/serialize/currency false-positive
+3. 신규 PR에서 변경 파일이 회귀 팩 파일과 겹치면 해당 팩 테스트를 필수 실행한다.
+4. 미커밋 수식 변경이 존재하므로, `mathematics.ts` 관련 테스트는 우선 작성 후 기능 커밋을 권장한다.
+
 ---
 
 ## 3. 단계별 구현 로드맵
@@ -167,6 +190,10 @@
 
 4. turbo 태스크 추가
 - `test` 태스크 추가(캐시 가능), 필요 시 `test:e2e`는 non-cache.
+
+5. 회귀 기준선 스냅샷
+- `fa95098e..main` 범위에서 변경된 36개 파일을 회귀 매핑표로 고정.
+- 우선 보호 파일(협업/테이블/정의목록/수식/API)을 `must-test` 목록으로 문서화.
 
 완료 조건:
 1. `pnpm test`가 최소 샘플 테스트를 성공한다.
@@ -197,6 +224,27 @@
 1. sync 요청/응답/업데이트 전파, snapshot 저장 타이밍, destroy 정리 동작 검증.
 2. 업로드 성공/401/실패 분기 검증.
 3. 501 route 계약 검증.
+
+## Phase 2.5 변경 이력 기반 회귀팩 구축
+
+대상:
+
+1. 테이블 관련 과거 fix 회귀
+- bootstrap overwrite 방지
+- 셀 내부 placeholder 비노출
+- 셀 선택 시 레이아웃 안정성
+
+2. 협업 관련 과거 fix 회귀
+- private mode에서 snapshot read/write 실패 내성
+- no-peer/no-remote/no-snapshot 조건에서만 default bootstrap
+
+3. 수식 관련 워킹트리 변경 회귀
+- `$` 파싱 false-positive(`$12`, `\\$x\\$`, `$$x$$`) 방지
+- parseHTML fallback(`latex`, `data-latex`, textContent) 보장
+
+완료 조건:
+1. 최근 실제 fix 이력을 테스트 케이스 ID와 1:1로 매핑.
+2. 해당 케이스를 변경 파일 조건부(required)로 CI에 연결.
 
 ## Phase 3. P1 컴포넌트 테스트 구축
 
@@ -352,6 +400,32 @@
 6. `E2E-006 테마 전환`
 - 메뉴에서 dark/light/system 선택 시 html class 반영 확인.
 
+## 4.11 변경 이력 회귀 테스트 팩 (추가)
+
+1. `REG-TABLE-001`
+- 테이블 삽입 직후 문서가 기본 콘텐츠로 재부트스트랩되지 않아야 한다.
+
+2. `REG-TABLE-002`
+- 테이블 셀/헤더 내부 paragraph placeholder(`Press '/' for commands`)가 노출되지 않아야 한다.
+
+3. `REG-TABLE-003`
+- 셀 선택 상태에서 bubble 메뉴와 table selector가 충돌하지 않아야 한다.
+
+4. `REG-COLLAB-001`
+- private mode(localStorage read/write 예외)에서도 에디터 초기화가 실패하지 않아야 한다.
+
+5. `REG-COLLAB-002`
+- snapshot 복원 성공 시 default content bootstrap이 실행되지 않아야 한다.
+
+6. `REG-MATH-001`
+- `$12$`/`Price is $12$`는 인라인 수식으로 파싱되지 않아야 한다.
+
+7. `REG-MATH-002`
+- `\\$x\\$`, code span `` `$x$` ``은 수식 토큰으로 변환되지 않아야 한다.
+
+8. `REG-MATH-003`
+- `span[data-type=\"math\"]`에 latex 속성이 없어도 parse 단계에서 보정되어야 한다.
+
 ---
 
 ## 5. 테스트 인프라 파일 변경 계획
@@ -373,6 +447,9 @@
 5. `.github/workflows/test.yaml` (신규)
 - PR/Push 테스트 게이트.
 
+6. `testing-regression-map.md` (신규 권장)
+- 커밋/파일/회귀팩 매핑 문서.
+
 ## 5.2 `apps/web`
 
 1. `apps/web/vitest.config.ts` (신규)
@@ -380,12 +457,16 @@
 3. `apps/web/tests/unit/...` (신규)
 4. `apps/web/tests/integration/...` (신규)
 5. `apps/web/tests/e2e/...` 또는 루트 `e2e/...` (신규)
+6. `apps/web/tests/regression/...` (신규 권장)
+- table/collab/math 회귀팩 전용.
 
 ## 5.3 `packages/headless`
 
 1. `packages/headless/vitest.config.ts` (신규)
 2. `packages/headless/tests/setup.ts` (신규)
 3. `packages/headless/src/**/__tests__/*.test.ts(x)` (신규)
+4. `packages/headless/src/extensions/__tests__/regression/*.test.ts` (신규 권장)
+- `definition-list`, `table-drag-guard`, `mathematics` 회귀 케이스 분리.
 
 ---
 
@@ -410,6 +491,9 @@
 6. editor mock factory
 - command chain(`chain().focus().xxx().run()`)를 일관된 stub으로 생성.
 
+7. ProseMirror 선택/좌표 mock
+- `CellSelection`, `posAtCoords`, `DOMRect` 경로를 안정적으로 재현하는 헬퍼 추가.
+
 ---
 
 ## 7. 품질 게이트와 커버리지 정책
@@ -419,6 +503,7 @@
 1. 모든 PR에서 `typecheck + lint + test(unit/integration)` 필수.
 2. E2E는 핵심 브랜치(`main`) 또는 라벨(`e2e-required`) 조건으로 우선 운영 가능.
 3. flaky test는 병합 금지, 원인 해결 후 재활성화.
+4. 회귀팩(`REG-*`) 실패 시 coverage 수치와 무관하게 merge 차단.
 
 ## 7.2 커버리지 기준 (점진적 상향)
 
@@ -456,6 +541,9 @@
 5. 현재 코드의 내부 비공개 함수 테스트 한계
 - 대응: 테스트 가능성을 해치지 않는 선에서 `internal utils` 분리 리팩터링을 Phase 1에 포함.
 
+6. 워킹트리 미커밋 변경과 테스트 괴리
+- 대응: `mathematics.ts`, `content.ts` 변경은 커밋 전 회귀팩(`REG-MATH-*`) 통과를 필수로 적용.
+
 ---
 
 ## 9. 일정 제안 (현실적 기준)
@@ -478,6 +566,9 @@
 6. Day 8
 - Phase 5 완료(CI 안정화, 커버리지 리포트 정착).
 
+7. Day 9
+- Phase 2.5 회귀팩 고도화 + 변경파일 조건부 실행 규칙 튜닝.
+
 ---
 
 ## 10. 완료 기준 (Definition of Done)
@@ -487,6 +578,7 @@
 3. 핵심 E2E 6개 시나리오가 통과.
 4. 신규 PR은 테스트 없이 merge 불가한 정책 적용.
 5. 테스트 실행/디버깅 가이드가 README 또는 별도 `TESTING.md`에 문서화됨.
+6. 최근 fix 이력 기반 `REG-*` 회귀팩이 CI에서 자동 실행됨.
 
 ---
 
@@ -500,4 +592,4 @@
 6. 메뉴/테이블/수식 selector 컴포넌트 테스트 추가.
 7. Playwright 스모크 6개 작성.
 8. GitHub Actions 테스트 워크플로 배치.
-
+9. `REG-*` 회귀팩(테이블/협업/수식) 작성 후 변경파일 조건부 실행 연결.

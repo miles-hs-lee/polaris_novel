@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "vitest run --config ./vitest.config.ts",
+    "test:watch": "vitest --config ./vitest.config.ts",
     "lint": "biome lint .",
     "format": "biome format . ",
     "typecheck": "tsc --noEmit"

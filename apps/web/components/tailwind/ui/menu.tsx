@@ -1,6 +1,12 @@
 "use client";
 
-import { defaultEditorContent } from "@/lib/content";
+import {
+  applyAppearanceTheme,
+  createNewDocument,
+  exportJsonDocument,
+  exportMarkdownDocument,
+  loadFeatureDocument,
+} from "@/lib/editor/menu-actions";
 import { useEffect, useState } from "react";
 import { BookOpen, Check, Download, FileJson, FilePlus, FileUp, Menu as MenuIcon, Monitor, Moon, SunDim } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -38,29 +44,6 @@ const appearances = [
     icon: <Moon className="h-4 w-4" />,
   },
 ];
-
-const buildFilename = (ext: "json" | "md") => {
-  const date = new Date();
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `novel-${yyyy}${mm}${dd}.${ext}`;
-};
-
-const downloadText = (filename: string, content: string, contentType: string) => {
-  const blob = new Blob([content], { type: contentType });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-};
-
-const emptyEditorContent = {
-  type: "doc",
-  content: [{ type: "paragraph" }],
-};
 
 export default function Menu() {
   // const { font: currentFont, setFont } = useContext(AppContext);
@@ -110,8 +93,7 @@ export default function Menu() {
     if (!confirmed) return;
 
     try {
-      editor.commands.setContent(emptyEditorContent, true);
-      editor.commands.focus("start");
+      createNewDocument(editor);
       toast.success("새 문서를 만들었습니다.");
     } catch {
       toast.error("새 문서를 만들지 못했습니다.");
@@ -128,8 +110,7 @@ export default function Menu() {
     if (!confirmed) return;
 
     try {
-      editor.commands.setContent(defaultEditorContent, true);
-      editor.commands.focus("start");
+      loadFeatureDocument(editor);
       toast.success("기능 소개 문서를 불러왔습니다.");
     } catch {
       toast.error("기능 소개 문서를 불러오지 못했습니다.");
@@ -142,8 +123,7 @@ export default function Menu() {
       return;
     }
 
-    const markdown = editor.storage.markdown.getMarkdown();
-    downloadText(buildFilename("md"), markdown, "text/markdown;charset=utf-8");
+    exportMarkdownDocument(editor);
     toast.success("Markdown 파일을 내보냈습니다.");
   };
 
@@ -153,8 +133,7 @@ export default function Menu() {
       return;
     }
 
-    const json = editor.getJSON();
-    downloadText(buildFilename("json"), JSON.stringify(json, null, 2), "application/json;charset=utf-8");
+    exportJsonDocument(editor);
     toast.success("JSON 파일을 내보냈습니다.");
   };
 
@@ -264,7 +243,7 @@ export default function Menu() {
             key={theme}
             className="flex w-full items-center justify-between rounded px-2 py-1.5 text-sm"
             onClick={() => {
-              setTheme(theme.toLowerCase());
+              applyAppearanceTheme(setTheme, theme);
             }}
           >
             <div className="flex items-center space-x-2">

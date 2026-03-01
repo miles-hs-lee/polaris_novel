@@ -1,0 +1,163 @@
+name: ✅ Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      table: ${{ steps.filter.outputs.table }}
+      collab: ${{ steps.filter.outputs.collab }}
+      math: ${{ steps.filter.outputs.math }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            table:
+              - 'apps/web/components/tailwind/extensions.ts'
+              - 'apps/web/components/tailwind/selectors/table-selector.tsx'
+              - 'apps/web/components/tailwind/advanced-editor.tsx'
+              - 'apps/web/styles/prosemirror.css'
+              - 'packages/headless/src/extensions/table.ts'
+              - 'packages/headless/src/extensions/table-drag-guard.ts'
+              - 'packages/headless/src/extensions/index.ts'
+              - 'packages/headless/src/components/editor-bubble.tsx'
+            collab:
+              - 'apps/web/lib/collab/**'
+              - 'apps/web/components/tailwind/advanced-editor.tsx'
+              - 'apps/web/app/page.tsx'
+              - 'apps/web/hooks/use-local-storage.ts'
+            math:
+              - 'packages/headless/src/extensions/mathematics.ts'
+              - 'apps/web/components/tailwind/selectors/math-selector.tsx'
+              - 'apps/web/lib/content.ts'
+
+  test:
+    name: typecheck + unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+  regression-table:
+    name: regression table pack
+    if: ${{ needs.changes.outputs.table == 'true' }}
+    needs:
+      - changes
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Run table regression pack
+        run: pnpm test:regression:table
+
+  regression-collab:
+    name: regression collab pack
+    if: ${{ needs.changes.outputs.collab == 'true' }}
+    needs:
+      - changes
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Run collab regression pack
+        run: pnpm test:regression:collab
+
+  regression-math:
+    name: regression math pack
+    if: ${{ needs.changes.outputs.math == 'true' }}
+    needs:
+      - changes
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Run math regression pack
+        run: pnpm test:regression:math

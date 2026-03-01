@@ -14,6 +14,8 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "build": "tsup",
+    "test": "vitest run --config ./vitest.config.ts",
+    "test:watch": "vitest --config ./vitest.config.ts",
     "lint": "biome lint ./src",
     "format": "biome format ./src "
   },

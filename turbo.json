@@ -27,6 +27,15 @@
       ],
       "outputs": []
     },
+    "test": {
+      "dependsOn": [
+        "^test",
+        "^build"
+      ],
+      "outputs": [
+        "coverage/**"
+      ]
+    },
     "lint": {
       "dependsOn": [
         "^topo"
@@ -56,6 +65,9 @@
       "cache": false
     },
     "release": {
+      "cache": false
+    },
+    "test:e2e": {
       "cache": false
     }
   }

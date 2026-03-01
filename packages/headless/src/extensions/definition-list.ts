@@ -569,3 +569,7 @@ export const DefinitionDescription = Node.create<DefinitionDescriptionOptions>({
     ];
   },
 });
+
+export const __definitionListTestUtils = {
+  parseDefinitionParagraph,
+};
