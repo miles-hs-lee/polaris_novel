@@ -1,6 +1,8 @@
 "use client";
 import { defaultEditorContent } from "@/lib/content";
+import { LiveblocksCollabProvider, isLiveblocksConfigured } from "@/lib/collab/liveblocks-provider";
 import { LocalBroadcastProvider } from "@/lib/collab/local-provider";
+import type { CollabMode, CollabProvider } from "@/lib/collab/types";
 import { getLocalCollabUser } from "@/lib/collab/user";
 import {
   EditorCommand,
@@ -37,9 +39,10 @@ const hljs = require("highlight.js");
 
 type TailwindAdvancedEditorProps = {
   docId: string;
+  mode: CollabMode;
 };
 
-const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
+const TailwindAdvancedEditor = ({ docId, mode }: TailwindAdvancedEditorProps) => {
   const [saveStatus, setSaveStatus] = useState("Saved");
   const [syncStatus, setSyncStatus] = useState<"connecting" | "disconnected" | "synced">("connecting");
   const [charsCount, setCharsCount] = useState<number>();
@@ -50,8 +53,9 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
   const [openAI, setOpenAI] = useState(false);
   const bootstrapTimerRef = useRef<number | null>(null);
   const [collab, setCollab] = useState<{
+    mode: CollabMode;
     doc: Y.Doc;
-    provider: LocalBroadcastProvider;
+    provider: CollabProvider;
   } | null>(null);
 
   const collabUser = useMemo(() => getLocalCollabUser(), []);
@@ -92,10 +96,25 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
     setSyncStatus("connecting");
     setCollab(null);
 
-    const doc = new Y.Doc();
-    const provider = new LocalBroadcastProvider({ doc, docId });
+    let resolvedMode: CollabMode = mode;
+    let provider: CollabProvider;
+    let doc: Y.Doc;
 
-    setCollab({ doc, provider });
+    if (mode === "liveblocks" && isLiveblocksConfigured()) {
+      const liveblocksProvider = new LiveblocksCollabProvider({ docId });
+      provider = liveblocksProvider;
+      doc = liveblocksProvider.getDoc();
+    } else {
+      if (mode === "liveblocks" && !isLiveblocksConfigured()) {
+        console.warn("Missing NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY; falling back to local collaboration mode.");
+      }
+
+      resolvedMode = "local";
+      doc = new Y.Doc();
+      provider = new LocalBroadcastProvider({ doc, docId });
+    }
+
+    setCollab({ doc, mode: resolvedMode, provider });
 
     const handleStatus = ({ status }: { status: "connected" | "disconnected" }) => {
       setSyncStatus(status === "connected" ? "connecting" : "disconnected");
@@ -121,10 +140,14 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
       }
 
       provider.destroy();
-      doc.destroy();
+
+      if (resolvedMode === "local") {
+        doc.destroy();
+      }
+
       setCollab((current) => (current?.provider === provider ? null : current));
     };
-  }, [docId]);
+  }, [docId, mode]);
 
   const syncBadgeLabel =
     syncStatus === "synced" ? "Synced" : syncStatus === "connecting" ? "Connecting..." : "Disconnected";
@@ -156,6 +179,7 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
             }
 
             bootstrapTimerRef.current = window.setTimeout(() => {
+              if (collab.mode !== "local") return;
               if (shouldBootstrapDefaultContent({
                 restoredFromSnapshot: collab.provider.restoredFromSnapshot,
                 hasRemoteUpdates: collab.provider.hasRemoteUpdates(),

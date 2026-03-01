@@ -7,7 +7,9 @@
 ## 현재 포함 기능
 
 - Notion 스타일 리치 텍스트 편집
-- 로컬 CRDT 기반 실시간 협업 (같은 브라우저 프로필/동일 도메인 창 간)
+- `docId` 기반 실시간 협업
+- Liveblocks 기반 다중 기기 협업(환경 변수 설정 시)
+- 로컬 CRDT 협업 fallback (`mode=local`)
 - 우측 상단 메뉴(삼선)에서:
 - `MD 가져오기`
 - `MD 내보내기`
@@ -30,10 +32,11 @@ npm run dev
 
 브라우저에서 `http://localhost:3000` 접속
 
-로컬 협업 테스트:
+협업 테스트:
 
-- 같은 브라우저에서 `http://localhost:3000/?doc=demo` 를 창 2개 이상 열기
-- 같은 `doc` 값을 사용하면 실시간 동기화됨
+- 기본 모드(Liveblocks): `http://localhost:3000/?doc=demo`
+- 로컬 모드 강제: `http://localhost:3000/?doc=demo&mode=local`
+- 같은 `doc` 값이면 동일 room으로 동기화됨
 
 ## 환경 변수
 
@@ -41,6 +44,8 @@ npm run dev
 
 선택 사항:
 
+- `NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY`
+  - 다중 기기 실시간 협업에 필요
 - `BLOB_READ_WRITE_TOKEN`
   - 이미지 업로드 API(`/api/upload`)를 사용할 때 필요
 - AI 생성 API(`/api/generate`)는 현재 비활성화(501 응답)

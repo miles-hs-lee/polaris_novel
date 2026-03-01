@@ -32,22 +32,16 @@ import {
 } from "novel";
 import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
-import type { Awareness } from "y-protocols/awareness";
+import type { CollabProvider } from "@/lib/collab/types";
 import type { Doc as YDoc } from "yjs";
 
 import { cx } from "class-variance-authority";
 import { common, createLowlight } from "lowlight";
 import { Markdown } from "tiptap-markdown";
 
-type CollaborationProvider = {
-  awareness: Awareness;
-  off: (event: string, callback: (...args: unknown[]) => void) => void;
-  on: (event: string, callback: (...args: unknown[]) => void) => void;
-};
-
 export type CollaborationConfig = {
   doc: YDoc;
-  provider: CollaborationProvider;
+  provider: CollabProvider;
   user: {
     color: string;
     name: string;
