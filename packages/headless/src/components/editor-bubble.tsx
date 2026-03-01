@@ -1,5 +1,6 @@
 import { BubbleMenu, isNodeSelection, useCurrentEditor } from "@tiptap/react";
 import type { BubbleMenuProps } from "@tiptap/react";
+import { CellSelection } from "@tiptap/pm/tables";
 import { forwardRef, useEffect, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 import type { Instance, Props } from "tippy.js";
@@ -31,6 +32,11 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
         // - the selection is empty (text selection)
         // - the node selection is not a definition term
         if (!editor.isEditable || editor.isActive("image")) {
+          return false;
+        }
+
+        // Keep table multi-cell actions in the dedicated table toolbar only.
+        if (selection instanceof CellSelection) {
           return false;
         }
 
