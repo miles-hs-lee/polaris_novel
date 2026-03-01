@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { createImageUpload, handleImageDrop, handleImagePaste } from "./upload-images";
 
+type UploadView = Parameters<typeof handleImagePaste>[0];
+
 const createViewStub = (options?: { selectionFrom?: number; dropPos?: number }) => {
   const tr = {
     selection: {
@@ -28,7 +30,7 @@ const createViewStub = (options?: { selectionFrom?: number; dropPos?: number }) 
     },
     posAtCoords: vi.fn(() => ({ pos: options?.dropPos ?? 11 })),
     dispatch: vi.fn(),
-  };
+  } as unknown as UploadView;
 };
 
 describe("upload-images helpers", () => {
@@ -39,7 +41,7 @@ describe("upload-images helpers", () => {
     const view = createViewStub({ selectionFrom: 9 });
 
     const handled = handleImagePaste(
-      view as any,
+      view,
       {
         clipboardData: { files: [file] },
         preventDefault,
@@ -58,7 +60,7 @@ describe("upload-images helpers", () => {
     const view = createViewStub();
 
     const handled = handleImagePaste(
-      view as any,
+      view,
       {
         clipboardData: { files: [] },
         preventDefault,
@@ -78,7 +80,7 @@ describe("upload-images helpers", () => {
     const view = createViewStub({ dropPos: 18 });
 
     const handled = handleImageDrop(
-      view as any,
+      view,
       {
         clientX: 10,
         clientY: 20,
@@ -102,7 +104,7 @@ describe("upload-images helpers", () => {
     const view = createViewStub();
 
     const handled = handleImageDrop(
-      view as any,
+      view,
       {
         clientX: 1,
         clientY: 2,
@@ -125,7 +127,7 @@ describe("upload-images helpers", () => {
     const onUpload = vi.fn(() => Promise.resolve("https://example.com/image.png"));
     const uploadFn = createImageUpload({ validateFn, onUpload });
 
-    uploadFn(file, view as any, 3);
+    uploadFn(file, view, 3);
 
     expect(validateFn).toHaveBeenCalledWith(file);
     expect(onUpload).not.toHaveBeenCalled();
@@ -138,7 +140,7 @@ describe("upload-images helpers", () => {
     const onUpload = vi.fn(() => new Promise(() => {}));
     const uploadFn = createImageUpload({ validateFn, onUpload });
 
-    uploadFn(file, view as any, 3);
+    uploadFn(file, view, 3);
 
     expect(validateFn).toHaveBeenCalledWith(file);
     expect(onUpload).toHaveBeenCalledWith(file);

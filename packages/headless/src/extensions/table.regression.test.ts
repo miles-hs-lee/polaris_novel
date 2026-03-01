@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { resolvePlaceholderText } from "./placeholder-utils";
 
+type PlaceholderInput = Parameters<typeof resolvePlaceholderText>[0];
+type PlaceholderEditor = PlaceholderInput["editor"];
+
 const createEditorWithAncestors = (ancestors: string[]) => {
   return {
     state: {
@@ -15,7 +18,7 @@ const createEditorWithAncestors = (ancestors: string[]) => {
         }),
       },
     },
-  } as any;
+  } as unknown as PlaceholderEditor;
 };
 
 describe("REG-TABLE regression pack (headless)", () => {

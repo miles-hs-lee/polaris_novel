@@ -74,7 +74,7 @@ describe("mathematics markdown tokenizer internals", () => {
 
   it("installs markdown-it rule only once", () => {
     const afterSpy = vi.fn();
-    const markdownIt: any = {
+    const markdownIt: Parameters<typeof __mathematicsTestUtils.setupInlineMathMarkdownRule>[0] = {
       inline: {
         ruler: {
           after: afterSpy,
@@ -93,13 +93,13 @@ describe("mathematics markdown tokenizer internals", () => {
   });
 
   it("renders inline math token with escaped html", () => {
-    const tokens = [
+    const tokens: Parameters<typeof __mathematicsTestUtils.renderInlineMathToken>[0] = [
       {
         content: "<x>&\"",
         attrSet: () => {},
         attrGet: () => null,
       },
-    ] as any;
+    ];
 
     const html = __mathematicsTestUtils.renderInlineMathToken(tokens, 0);
 

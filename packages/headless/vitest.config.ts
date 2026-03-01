@@ -20,10 +20,18 @@ export default defineConfig({
     ],
     coverage: {
       provider: "v8",
+      all: false,
       reporter: [
         "text",
         "lcov",
+        "json-summary",
       ],
+      thresholds: {
+        lines: 55,
+        branches: 45,
+        functions: 55,
+        statements: 55,
+      },
     },
   },
   resolve: {
@@ -32,4 +40,3 @@ export default defineConfig({
     },
   },
 });
-

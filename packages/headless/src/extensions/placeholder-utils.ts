@@ -1,7 +1,7 @@
 import type { Editor } from "@tiptap/core";
 
 type PlaceholderNode = {
-  attrs: Record<string, any>;
+  attrs: Record<string, unknown>;
   type: {
     name: string;
   };
@@ -17,7 +17,8 @@ export const resolvePlaceholderText = ({
   pos: number;
 }) => {
   if (node.type.name === "heading") {
-    return `Heading ${node.attrs.level}`;
+    const level = node.attrs.level;
+    return `Heading ${typeof level === "number" ? level : ""}`.trimEnd();
   }
 
   if (node.type.name !== "paragraph") {
@@ -34,4 +35,3 @@ export const resolvePlaceholderText = ({
 
   return "Press '/' for commands";
 };
-

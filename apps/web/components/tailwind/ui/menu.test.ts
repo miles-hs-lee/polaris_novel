@@ -2,21 +2,41 @@ import { describe, expect, it, vi } from "vitest";
 import { defaultEditorContent } from "@/lib/content";
 import * as MenuActions from "@/lib/editor/menu-actions";
 
-const createEditorMock = () => ({
+type EditorMock = MenuActions.MenuEditorLike & {
   commands: {
-    setContent: vi.fn(),
-    focus: vi.fn(),
-  },
+    setContent: ReturnType<typeof vi.fn>;
+    focus: ReturnType<typeof vi.fn>;
+  };
   storage: {
     markdown: {
-      getMarkdown: vi.fn(() => "# hello"),
-    },
-  },
-  getJSON: vi.fn(() => ({
+      getMarkdown: ReturnType<typeof vi.fn>;
+    };
+  };
+  getJSON: ReturnType<typeof vi.fn>;
+};
+
+const createEditorMock = (): EditorMock => {
+  const setContent = vi.fn();
+  const focus = vi.fn();
+  const getMarkdown = vi.fn(() => "# hello");
+  const getJSON = vi.fn(() => ({
     type: "doc",
     content: [{ type: "paragraph" }],
-  })),
-});
+  }));
+
+  return {
+    commands: {
+      setContent,
+      focus,
+    },
+    storage: {
+      markdown: {
+        getMarkdown,
+      },
+    },
+    getJSON,
+  };
+};
 
 describe("menu helpers", () => {
   it("builds dated export filenames", () => {
@@ -27,7 +47,7 @@ describe("menu helpers", () => {
   it("creates empty editor document", () => {
     const editor = createEditorMock();
 
-    MenuActions.createNewDocument(editor as any);
+    MenuActions.createNewDocument(editor);
 
     expect(editor.commands.setContent).toHaveBeenCalledWith(MenuActions.emptyEditorContent, true);
     expect(editor.commands.focus).toHaveBeenCalledWith("start");
@@ -36,7 +56,7 @@ describe("menu helpers", () => {
   it("loads feature document content", () => {
     const editor = createEditorMock();
 
-    MenuActions.loadFeatureDocument(editor as any);
+    MenuActions.loadFeatureDocument(editor);
 
     expect(editor.commands.setContent).toHaveBeenCalledWith(defaultEditorContent, true);
     expect(editor.commands.focus).toHaveBeenCalledWith("start");
@@ -46,7 +66,7 @@ describe("menu helpers", () => {
     const editor = createEditorMock();
     const download = vi.fn();
 
-    MenuActions.exportMarkdownDocument(editor as any, download);
+    MenuActions.exportMarkdownDocument(editor, download);
 
     expect(download).toHaveBeenCalledTimes(1);
     expect(download.mock.calls[0]?.[0]).toMatch(/^novel-\d{8}\.md$/);
@@ -58,7 +78,7 @@ describe("menu helpers", () => {
     const editor = createEditorMock();
     const download = vi.fn();
 
-    MenuActions.exportJsonDocument(editor as any, download);
+    MenuActions.exportJsonDocument(editor, download);
 
     expect(download).toHaveBeenCalledTimes(1);
     expect(download.mock.calls[0]?.[0]).toMatch(/^novel-\d{8}\.json$/);

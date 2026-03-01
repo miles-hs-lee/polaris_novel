@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { __mathematicsTestUtils } from "./mathematics";
 
-const createInlineState = (source: string, position = 0) => {
-  const state = {
+type InlineState = Parameters<typeof __mathematicsTestUtils.tokenizeInlineMath>[0];
+
+const createInlineState = (source: string, position = 0): InlineState => {
+  return {
     pos: position,
     src: source,
     push: () => ({
@@ -10,8 +12,6 @@ const createInlineState = (source: string, position = 0) => {
       attrGet: () => null,
     }),
   };
-
-  return state as any;
 };
 
 describe("REG-MATH regression pack", () => {
@@ -37,4 +37,3 @@ describe("REG-MATH regression pack", () => {
     expect(node.getAttribute("latex")).toBe("x^2");
   });
 });
-

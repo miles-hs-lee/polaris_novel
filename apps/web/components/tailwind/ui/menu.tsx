@@ -140,7 +140,7 @@ export default function Menu() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" aria-label="Open menu">
           <MenuIcon width={16} />
         </Button>
       </PopoverTrigger>

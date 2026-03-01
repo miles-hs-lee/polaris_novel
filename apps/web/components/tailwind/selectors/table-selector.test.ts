@@ -4,6 +4,7 @@ import {
   isTableHeaderActive,
   runTableAction,
   shouldShowTableBubble,
+  type TableEditorLike,
 } from "@/lib/editor/table-actions";
 
 type TableActionName =
@@ -21,7 +22,23 @@ type TableActionName =
 const createTableEditorMock = (options?: {
   activeHeader?: boolean;
   disabledActions?: TableActionName[];
-}) => {
+}): {
+  editor: TableEditorLike;
+  chain: {
+    focus: ReturnType<typeof vi.fn>;
+    addRowBefore: ReturnType<typeof vi.fn>;
+    addRowAfter: ReturnType<typeof vi.fn>;
+    addColumnBefore: ReturnType<typeof vi.fn>;
+    addColumnAfter: ReturnType<typeof vi.fn>;
+    mergeCells: ReturnType<typeof vi.fn>;
+    splitCell: ReturnType<typeof vi.fn>;
+    toggleHeaderRow: ReturnType<typeof vi.fn>;
+    deleteRow: ReturnType<typeof vi.fn>;
+    deleteColumn: ReturnType<typeof vi.fn>;
+    deleteTable: ReturnType<typeof vi.fn>;
+    run: ReturnType<typeof vi.fn>;
+  };
+} => {
   const chain = {
     focus: vi.fn(() => chain),
     addRowBefore: vi.fn(() => chain),
@@ -67,28 +84,28 @@ describe("table selector helpers", () => {
       shouldShowTableBubble({
         isEditable: false,
         isActive: () => true,
-      } as any),
+      }),
     ).toBe(false);
 
     expect(
       shouldShowTableBubble({
         isEditable: true,
         isActive: (type: string) => type === "tableCell",
-      } as any),
+      }),
     ).toBe(true);
 
     expect(
       shouldShowTableBubble({
         isEditable: true,
         isActive: () => false,
-      } as any),
+      }),
     ).toBe(false);
   });
 
   it("runs add-row-before command chain", () => {
     const { editor, chain } = createTableEditorMock();
 
-    const result = runTableAction(editor as any, "addRowBefore");
+    const result = runTableAction(editor, "addRowBefore");
 
     expect(result).toBe(true);
     expect(chain.focus).toHaveBeenCalledTimes(1);
@@ -99,12 +116,12 @@ describe("table selector helpers", () => {
   it("reads disabled state from editor.can()", () => {
     const { editor } = createTableEditorMock({ disabledActions: ["deleteTable"] });
 
-    expect(canRunTableAction(editor as any, "deleteTable")).toBe(false);
+    expect(canRunTableAction(editor, "deleteTable")).toBe(false);
   });
 
   it("computes header action active state from editor.isActive()", () => {
     const { editor } = createTableEditorMock({ activeHeader: true });
 
-    expect(isTableHeaderActive(editor as any)).toBe(true);
+    expect(isTableHeaderActive(editor)).toBe(true);
   });
 });

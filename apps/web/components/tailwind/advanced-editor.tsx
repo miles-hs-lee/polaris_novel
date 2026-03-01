@@ -196,8 +196,12 @@ const TailwindAdvancedEditor = ({ docId, mode }: TailwindAdvancedEditorProps) =>
           slotAfter={<ImageResizer />}
         >
           <div className="flex absolute right-5 top-5 z-10 mb-5 items-center gap-2">
-            <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">{syncBadgeLabel}</div>
-            <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">{saveStatus}</div>
+            <div data-testid="sync-status-badge" className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
+              {syncBadgeLabel}
+            </div>
+            <div data-testid="save-status-badge" className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
+              {saveStatus}
+            </div>
             <div className={charsCount ? "rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground" : "hidden"}>
               {charsCount} Words
             </div>

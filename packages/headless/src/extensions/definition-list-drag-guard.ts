@@ -1,7 +1,7 @@
 import { Extension } from "@tiptap/core";
-import { type Slice } from "@tiptap/pm/model";
+import type { Slice } from "@tiptap/pm/model";
 import { NodeSelection, Plugin, PluginKey, type Selection } from "@tiptap/pm/state";
-import { type EditorView } from "@tiptap/pm/view";
+import type { EditorView } from "@tiptap/pm/view";
 
 const TERM_LIKE_NODE_TYPES = new Set(["definitionTerm", "definitionDescription"]);
 

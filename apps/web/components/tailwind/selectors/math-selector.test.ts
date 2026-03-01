@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { toggleMathSelection } from "@/lib/editor/math-toggle";
+import { toggleMathSelection, type MathEditorLike } from "@/lib/editor/math-toggle";
 
 const createMathEditorMock = ({
   active = false,
@@ -7,7 +7,15 @@ const createMathEditorMock = ({
 }: {
   active?: boolean;
   selectedLatex?: string;
-} = {}) => {
+} = {}): {
+  editor: MathEditorLike;
+  chain: {
+    focus: ReturnType<typeof vi.fn>;
+    setLatex: ReturnType<typeof vi.fn>;
+    unsetLatex: ReturnType<typeof vi.fn>;
+    run: ReturnType<typeof vi.fn>;
+  };
+} => {
   const chain = {
     focus: vi.fn(() => chain),
     setLatex: vi.fn(() => chain),
@@ -36,7 +44,7 @@ describe("math selector helper", () => {
   it("unsets latex when math node is active", () => {
     const { editor, chain } = createMathEditorMock({ active: true });
 
-    const handled = toggleMathSelection(editor as any);
+    const handled = toggleMathSelection(editor);
 
     expect(handled).toBe(true);
     expect(chain.unsetLatex).toHaveBeenCalledTimes(1);
@@ -47,7 +55,7 @@ describe("math selector helper", () => {
   it("sets latex from selected text when inactive", () => {
     const { editor, chain } = createMathEditorMock({ active: false, selectedLatex: "a+b" });
 
-    const handled = toggleMathSelection(editor as any);
+    const handled = toggleMathSelection(editor);
 
     expect(handled).toBe(true);
     expect(editor.state.doc.textBetween).toHaveBeenCalledWith(1, 4);
@@ -58,7 +66,7 @@ describe("math selector helper", () => {
   it("does nothing when selection text is empty", () => {
     const { editor, chain } = createMathEditorMock({ active: false, selectedLatex: "" });
 
-    const handled = toggleMathSelection(editor as any);
+    const handled = toggleMathSelection(editor);
 
     expect(handled).toBe(false);
     expect(chain.setLatex).not.toHaveBeenCalled();

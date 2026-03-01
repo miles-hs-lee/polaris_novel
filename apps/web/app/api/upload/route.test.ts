@@ -21,14 +21,14 @@ describe("POST /api/upload", () => {
 
   afterEach(() => {
     if (originalToken === undefined) {
-      delete process.env.BLOB_READ_WRITE_TOKEN;
+      process.env.BLOB_READ_WRITE_TOKEN = "";
     } else {
       process.env.BLOB_READ_WRITE_TOKEN = originalToken;
     }
   });
 
   it("returns 401 when blob token is missing", async () => {
-    delete process.env.BLOB_READ_WRITE_TOKEN;
+    process.env.BLOB_READ_WRITE_TOKEN = "";
 
     const request = new Request("http://localhost/api/upload", {
       method: "POST",
@@ -96,4 +96,3 @@ describe("POST /api/upload", () => {
     );
   });
 });
-

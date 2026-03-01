@@ -35,19 +35,31 @@ type DefinitionGroup = {
   descriptions: string[][];
 };
 
+type MarkdownStorageLike = {
+  serializer?: {
+    serialize: (content: Fragment) => string;
+  };
+};
+
+type EditorStorageLike = {
+  storage: Record<string, unknown> & {
+    markdown?: MarkdownStorageLike;
+  };
+};
+
+type MarkdownSerializerStateLike = {
+  write: (value: string) => void;
+  ensureNewLine: () => void;
+  closeBlock: (node: ProseMirrorNode) => void;
+};
+
 const serializeHtmlBlock = (node: ProseMirrorNode) => {
   const html = getHTMLFromFragment(Fragment.from(node), node.type.schema);
   return `\n${html}\n`;
 };
 
-const serializeFragmentToMarkdown = (editor: { storage: Record<string, any> }, fragment: Fragment) => {
-  const markdownStorage = editor.storage["markdown"] as
-    | {
-        serializer?: {
-          serialize: (content: Fragment) => string;
-        };
-      }
-    | undefined;
+const serializeFragmentToMarkdown = (editor: EditorStorageLike, fragment: Fragment) => {
+  const markdownStorage = editor.storage.markdown as MarkdownStorageLike | undefined;
   return markdownStorage?.serializer?.serialize(fragment).trimEnd() ?? "";
 };
 
@@ -72,13 +84,11 @@ const isMarkdownSerializable = (node: ProseMirrorNode) => {
       return false;
     }
 
-    let descriptionCount = 0;
     while (index < children.length && children[index]?.type.name === "definitionDescription") {
       const descriptionNode = children[index];
       if (!descriptionNode) {
         return false;
       }
-      descriptionCount += 1;
       index += 1;
     }
   }
@@ -305,7 +315,7 @@ export const DefinitionList = Node.create<DefinitionListOptions>({
   addStorage() {
     return {
       markdown: {
-        serialize(this: { editor: { storage: Record<string, any> } }, state: any, node: ProseMirrorNode) {
+        serialize(this: { editor: EditorStorageLike }, state: MarkdownSerializerStateLike, node: ProseMirrorNode) {
           if (!isMarkdownSerializable(node)) {
             state.write(serializeHtmlBlock(node));
             state.closeBlock(node);
