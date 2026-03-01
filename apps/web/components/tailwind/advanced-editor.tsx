@@ -33,9 +33,16 @@ import GenerativeMenuSwitch from "./generative/generative-menu-switch";
 import { uploadFn } from "./image-upload";
 import { TextButtons } from "./selectors/text-buttons";
 import { slashCommand, suggestionItems } from "./slash-command";
-import { isEditorDocumentEmpty, shouldBootstrapDefaultContent } from "@/lib/editor/bootstrap-guards";
+import {
+  getBootstrapDelayMs,
+  isBootstrapOwner,
+  isEditorDocumentEmpty,
+  shouldBootstrapDefaultContent,
+} from "@/lib/editor/bootstrap-guards";
 
 const hljs = require("highlight.js");
+const BOOTSTRAP_SYNC_RETRY_MS = 250;
+const BOOTSTRAP_SYNC_TIMEOUT_MS = 5000;
 
 type TailwindAdvancedEditorProps = {
   docId: string;
@@ -183,16 +190,33 @@ const TailwindAdvancedEditor = ({ docId, mode }: TailwindAdvancedEditorProps) =>
               return;
             }
 
-            bootstrapTimerRef.current = window.setTimeout(() => {
+            const bootstrapStartedAt = Date.now();
+
+            const attemptBootstrap = () => {
+              if (!collab.provider.isSynced()) {
+                if (Date.now() - bootstrapStartedAt <= BOOTSTRAP_SYNC_TIMEOUT_MS) {
+                  bootstrapTimerRef.current = window.setTimeout(attemptBootstrap, BOOTSTRAP_SYNC_RETRY_MS);
+                }
+                return;
+              }
+
+              const ownsBootstrap = isBootstrapOwner({
+                selfClientId: collab.doc.clientID,
+                awarenessClientIds: collab.provider.awareness.getStates().keys(),
+              });
+
               if (shouldBootstrapDefaultContent({
                 restoredFromSnapshot: collab.provider.restoredFromSnapshot,
                 hasRemoteUpdates: collab.provider.hasRemoteUpdates(),
                 peerCount: collab.provider.getPeerCount(),
+                isBootstrapOwner: ownsBootstrap,
                 isEmpty: isEditorDocumentEmpty(editor),
               })) {
                 editor.commands.setContent(defaultEditorContent);
               }
-            }, 400);
+            };
+
+            bootstrapTimerRef.current = window.setTimeout(attemptBootstrap, getBootstrapDelayMs(collab.doc.clientID));
           }}
           onUpdate={({ editor }) => {
             debouncedUpdates(editor);

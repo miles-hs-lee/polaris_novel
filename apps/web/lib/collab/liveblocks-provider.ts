@@ -112,6 +112,10 @@ export class LiveblocksCollabProvider implements CollabProvider {
     return this.hasRemoteDocumentUpdate;
   }
 
+  public isSynced() {
+    return this.hasSynced;
+  }
+
   public getPeerCount() {
     let peers = 0;
 

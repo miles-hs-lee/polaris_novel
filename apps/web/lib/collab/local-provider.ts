@@ -128,6 +128,10 @@ export class LocalBroadcastProvider {
     return this.hasRemoteDocumentUpdate;
   }
 
+  public isSynced() {
+    return this.hasSynced;
+  }
+
   public getPeerCount() {
     let peers = 0;
 

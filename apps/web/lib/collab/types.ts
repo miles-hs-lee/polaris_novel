@@ -17,6 +17,7 @@ export type CollabProvider = {
   destroy: () => void;
   getPeerCount: () => number;
   hasRemoteUpdates: () => boolean;
+  isSynced: () => boolean;
   off: (event: string, callback: CollabProviderListener) => void;
   on: (event: string, callback: CollabProviderListener) => void;
 };
