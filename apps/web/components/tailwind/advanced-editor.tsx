@@ -179,7 +179,6 @@ const TailwindAdvancedEditor = ({ docId, mode }: TailwindAdvancedEditorProps) =>
             }
 
             bootstrapTimerRef.current = window.setTimeout(() => {
-              if (collab.mode !== "local") return;
               if (shouldBootstrapDefaultContent({
                 restoredFromSnapshot: collab.provider.restoredFromSnapshot,
                 hasRemoteUpdates: collab.provider.hasRemoteUpdates(),

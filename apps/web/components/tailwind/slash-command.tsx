@@ -14,8 +14,44 @@ import {
   Twitter,
   Youtube,
 } from "lucide-react";
-import { Command, createSuggestionItems, renderItems } from "novel";
+import { Command, createSuggestionItems, renderItems, type EditorInstance } from "novel";
 import { uploadFn } from "./image-upload";
+
+type CommandRange = {
+  from: number;
+  to: number;
+};
+
+type YSyncState = {
+  isChangeOrigin?: boolean;
+  prevSnapshot?: unknown;
+  snapshot?: unknown;
+};
+
+const isYSyncState = (value: unknown): value is YSyncState => {
+  if (!value || typeof value !== "object") return false;
+  const state = value as YSyncState;
+  return "snapshot" in state && "prevSnapshot" in state && typeof state.isChangeOrigin === "boolean";
+};
+
+const isRemoteCollabTransaction = (editor: EditorInstance) => {
+  for (const plugin of editor.state.plugins) {
+    const pluginState = plugin.getState(editor.state);
+    if (isYSyncState(pluginState)) {
+      return pluginState.isChangeOrigin === true;
+    }
+  }
+
+  return false;
+};
+
+const shouldAllowSlashCommand = ({ editor, range }: { editor: EditorInstance; range: CommandRange }) => {
+  if (isRemoteCollabTransaction(editor)) return false;
+  if (!editor.isFocused) return false;
+
+  const { from, to } = editor.state.selection;
+  return from === range.from && to === range.to;
+};
 
 export const suggestionItems = createSuggestionItems([
   {
@@ -236,6 +272,7 @@ export const suggestionItems = createSuggestionItems([
 
 export const slashCommand = Command.configure({
   suggestion: {
+    allow: shouldAllowSlashCommand,
     items: () => suggestionItems,
     render: renderItems,
   },

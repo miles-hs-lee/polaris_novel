@@ -44,6 +44,7 @@ export {
   TiptapTableHeader,
   TiptapTableCell,
   TableDragGuard,
+  TableTrailingParagraph,
   CharacterCount,
   GlobalDragHandle,
   DefinitionListDragGuard,

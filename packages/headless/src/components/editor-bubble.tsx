@@ -4,6 +4,30 @@ import { CellSelection } from "@tiptap/pm/tables";
 import { forwardRef, useEffect, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 import type { Instance, Props } from "tippy.js";
+import type { EditorState } from "@tiptap/pm/state";
+
+type YSyncState = {
+  isChangeOrigin?: boolean;
+  prevSnapshot?: unknown;
+  snapshot?: unknown;
+};
+
+const isYSyncState = (value: unknown): value is YSyncState => {
+  if (!value || typeof value !== "object") return false;
+  const state = value as YSyncState;
+  return "snapshot" in state && "prevSnapshot" in state && typeof state.isChangeOrigin === "boolean";
+};
+
+const isRemoteCollabTransaction = (state: EditorState) => {
+  for (const plugin of state.plugins) {
+    const pluginState = plugin.getState(state);
+    if (isYSyncState(pluginState)) {
+      return pluginState.isChangeOrigin === true;
+    }
+  }
+
+  return false;
+};
 
 export interface EditorBubbleProps extends Omit<BubbleMenuProps, "editor"> {
   readonly children: ReactNode;
@@ -23,6 +47,10 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
 
     const bubbleMenuProps: Omit<BubbleMenuProps, "children"> = useMemo(() => {
       const shouldShow: BubbleMenuProps["shouldShow"] = ({ editor, state }) => {
+        if (isRemoteCollabTransaction(state)) {
+          return false;
+        }
+
         const { selection } = state;
         const { empty } = selection;
 
@@ -31,7 +59,7 @@ export const EditorBubble = forwardRef<HTMLDivElement, EditorBubbleProps>(
         // - the selected node is an image
         // - the selection is empty (text selection)
         // - the node selection is not a definition term
-        if (!editor.isEditable || editor.isActive("image")) {
+        if (!editor.isEditable || !editor.isFocused || editor.isActive("image")) {
           return false;
         }
 

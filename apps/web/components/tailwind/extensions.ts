@@ -17,6 +17,7 @@ import {
   TaskItem,
   TaskList,
   TableDragGuard,
+  TableTrailingParagraph,
   TextStyle,
   TiptapTable,
   TiptapTableCell,
@@ -239,6 +240,7 @@ export const createExtensions = (collaboration?: CollaborationConfig) => {
     CustomKeymap,
     GlobalDragHandle,
     TableDragGuard,
+    TableTrailingParagraph,
     DefinitionListDragGuard,
   ];
 

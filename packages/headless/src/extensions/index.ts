@@ -20,6 +20,7 @@ import { Twitter } from "./twitter";
 import { Mathematics } from "./mathematics";
 import { TiptapTable, TiptapTableCell, TiptapTableHeader, TiptapTableRow } from "./table";
 import { TableDragGuard } from "./table-drag-guard";
+import { TableTrailingParagraph } from "./table-trailing-paragraph";
 import UpdatedImage from "./updated-image";
 
 import CharacterCount from "@tiptap/extension-character-count";
@@ -88,6 +89,7 @@ export {
   TiptapTableHeader,
   TiptapTableCell,
   TableDragGuard,
+  TableTrailingParagraph,
   CharacterCount,
   GlobalDragHandle,
   DefinitionListDragGuard,
