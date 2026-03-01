@@ -38,6 +38,38 @@ type TailwindAdvancedEditorProps = {
   docId: string;
 };
 
+type JsonNode = {
+  type?: string;
+  text?: string;
+  content?: JsonNode[];
+};
+
+const EMPTY_SCAFFOLD_TYPES = new Set(["doc", "paragraph", "text", "hardBreak"]);
+
+const hasMeaningfulContent = (node: JsonNode): boolean => {
+  if (typeof node.text === "string" && node.text.trim().length > 0) {
+    return true;
+  }
+
+  if (node.type && !EMPTY_SCAFFOLD_TYPES.has(node.type)) {
+    return true;
+  }
+
+  if (!node.content || node.content.length === 0) {
+    return false;
+  }
+
+  return node.content.some((child) => hasMeaningfulContent(child));
+};
+
+const isEditorDocumentEmpty = (editor: EditorInstance) => {
+  const doc = editor.getJSON() as JsonNode;
+  return !hasMeaningfulContent({
+    type: "doc",
+    content: Array.isArray(doc.content) ? doc.content : [],
+  });
+};
+
 const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
   const [saveStatus, setSaveStatus] = useState("Saved");
   const [syncStatus, setSyncStatus] = useState<"connecting" | "disconnected" | "synced">("connecting");
@@ -48,7 +80,6 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
   const bootstrapTimerRef = useRef<number | null>(null);
-  const hasLocalEditsRef = useRef(false);
   const [collab, setCollab] = useState<{
     doc: Y.Doc;
     provider: LocalBroadcastProvider;
@@ -91,7 +122,6 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
   useEffect(() => {
     setSyncStatus("connecting");
     setCollab(null);
-    hasLocalEditsRef.current = false;
 
     const doc = new Y.Doc();
     const provider = new LocalBroadcastProvider({ doc, docId });
@@ -157,24 +187,15 @@ const TailwindAdvancedEditor = ({ docId }: TailwindAdvancedEditorProps) => {
             }
 
             bootstrapTimerRef.current = window.setTimeout(() => {
-              if (hasLocalEditsRef.current) return;
               if (collab.provider.restoredFromSnapshot) return;
               if (collab.provider.hasRemoteUpdates()) return;
               if (collab.provider.getPeerCount() > 0) return;
-
-              const firstNode = editor.state.doc.firstChild;
-              const isTrulyBlankParagraphDoc =
-                editor.state.doc.childCount === 1 &&
-                firstNode?.type.name === "paragraph" &&
-                firstNode.content.size === 0;
-
-              if (isTrulyBlankParagraphDoc) {
+              if (isEditorDocumentEmpty(editor)) {
                 editor.commands.setContent(defaultEditorContent);
               }
             }, 400);
           }}
           onUpdate={({ editor }) => {
-            hasLocalEditsRef.current = true;
             debouncedUpdates(editor);
             setSaveStatus("Unsaved");
           }}

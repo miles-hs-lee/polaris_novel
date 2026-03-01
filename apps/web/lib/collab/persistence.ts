@@ -30,14 +30,25 @@ const fromBase64 = (encoded: string) => {
 export const restoreDocSnapshot = (docId: string, doc: Y.Doc) => {
   if (typeof window === "undefined") return false;
 
-  const snapshot = window.localStorage.getItem(getSnapshotKey(docId));
+  let snapshot: string | null = null;
+
+  try {
+    snapshot = window.localStorage.getItem(getSnapshotKey(docId));
+  } catch {
+    return false;
+  }
+
   if (!snapshot) return false;
 
   try {
     Y.applyUpdate(doc, fromBase64(snapshot), "local-snapshot");
     return true;
   } catch {
-    window.localStorage.removeItem(getSnapshotKey(docId));
+    try {
+      window.localStorage.removeItem(getSnapshotKey(docId));
+    } catch {
+      // Ignore storage cleanup failures in private mode.
+    }
     return false;
   }
 };
